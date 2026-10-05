@@ -1,0 +1,23 @@
+{
+  "name": "solpump-operations",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SolPump Operations — solar pump fleet dashboard (simulated field data)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "verify": "node tools/verify.mjs",
+    "smoke": "node tools/smoke.mjs",
+    "check": "npm run verify && npm run build && npm run smoke"
+  },
+  "devDependencies": {
+    "acorn": "^8.19.0",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "jsdom": "^30.1.2",
+    "vite": "^8.3.2",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}
