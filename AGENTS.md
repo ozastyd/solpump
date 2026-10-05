@@ -3,7 +3,7 @@
 ## What this is
 
 SolPump Operations — a single-file demo webapp (solar pump fleet dashboard, simulated field data).
-No framework, no tests, no CI, no git repo. Runtime code is plain ES modules under `src/`, bundled by
+No framework, no tests, no CI. Runtime code is plain ES modules under `src/`, bundled by
 Vite into one self-contained `dist/index.html`. Dependency-free means no *runtime* deps; devDependencies
 (vite, jsdom, eslint…) are allowed. Two build paths exist — Vite is primary, `build.sh` is the classic
 fallback (same artifact shape, same behavior).
@@ -24,6 +24,10 @@ sh build.sh        # classic single-file build (concatenated globals) — option
   The only external request is Google Fonts (Barlow); offline falls back to system fonts.
 - `dist/index.html` is **generated**. Never hand-edit it — the next build overwrites it entirely.
 - Freshness: rebuild whenever `src/` changes; quickest sanity is `npm run check`.
+- Deploy: `npm run check` → `git add -A && git commit -m "…"` → `git push`. Vercel builds
+  `main` remotely (command = `npm run verify && npm run build`, from `vercel.json`; smoke
+  excluded — needs Chrome) and publishes automatically. Repo `ozastyd/solpump`, live at
+  https://solpump-gamma.vercel.app. Never commit `dist/`, `node_modules/`, `.vercel/` (gitignored).
 
 ## Checks (both required after src edits)
 
