@@ -2,6 +2,7 @@ import logo from '../assets/logo.png';
 import './i18n.js';
 import './core.js';
 import './intel.js';
+import './motion.js';
 import './ui1.js';
 import './ui2.js';
 import './ui3.js';

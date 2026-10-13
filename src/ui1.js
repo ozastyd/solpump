@@ -3,6 +3,7 @@
    ============================================================ */
 import { $, D, DOW, H, MIN, ROLES, S, SIM, TS, audit, byId, can, clamp, dev, dk, fmtAgo, fmtDT, fmtDate, fmtDur, fmtN, fmtTime, has, last, lh, myPumps, pump, scoped, site, user, wib, window_ } from './core.js';
 import { I18N, LANGS, setLang, tl, tlk, tlx } from './i18n.js';
+import { settle } from './motion.js';
 import { ST_TXT, daily, diagnose, fiveQ, hColor, health, status, today, wellStats } from './intel.js';
 export const memo = (fn) => { const c = new Map(); return (p) => { const k = I18N.lang + p.id + "@" + S.now + "#" + TS[p.id].length + "/" + S.alarms.length; if (c.size > 300) c.clear(); if (!c.has(k)) c.set(k, fn(p)); return c.get(k); }; };
 export const healthM = memo(health), statusM = memo(status), diagM = memo(diagnose), fiveQM = memo(fiveQ), wellM = memo(wellStats);
@@ -152,6 +153,7 @@ export function login(uid_) {
 /* ---------- router ---------- */
 export let VIEW = { live: true };
 export const ROUTES = {};
+let PREVR = null;
 export function renderAll(keepScroll) {
   if (!S.session) return;
   const v = $("#view"); const sc = v ? v.scrollTop : 0;
@@ -163,6 +165,8 @@ export function renderAll(keepScroll) {
   renderTop(out.title || "", out.crumb);
   if (out.after) out.after();
   if (keepScroll && v) v.scrollTop = sc;
+  const nv = $("#view"); if (nv && VIEW.r !== PREVR) { nv.classList.remove("route-in"); void nv.offsetWidth; nv.classList.add("route-in"); } PREVR = VIEW.r;
+  settle(nv || document);
 }
 const closeSide = () => $("#side")?.classList.remove("open");
 window.addEventListener("hashchange", () => { closeSide(); renderAll(); $("#view")?.scrollTo(0, 0); });
@@ -197,16 +201,16 @@ export function fleetRow(p) {
 }
 let VID = 0;
 const chipI = (c, t) => `<span class="chip ${c}"><svg viewBox="0 0 24 24" aria-hidden="true">${IC[c === "ok" ? "check" : c === "off" ? "off" : "warn"]}</svg>${esc(t)}</span>`;
-export const tankSvg = (pct, low) => { const id = "tv" + (++VID), p = clamp(pct, 0, 100), h = 132 * p / 100, y = 134 - h, ly = 134 - 132 * low / 100; return `<svg class="vs" viewBox="0 0 76 136" role="img" aria-label="${esc(tl("Tank {pct}% full", { pct: Math.round(p) }))}"><defs><clipPath id="${id}"><rect x="2" y="2" width="72" height="132" rx="18"/></clipPath></defs><rect x="2" y="2" width="72" height="132" rx="18" fill="var(--waterbg)"/><g clip-path="url(#${id})"><rect x="2" y="${y}" width="72" height="${h}" fill="var(--water)"/><rect x="2" y="${y}" width="72" height="3" fill="#fff" opacity=".4"/></g><line x1="2" x2="74" y1="${ly}" y2="${ly}" stroke="var(--warn)" stroke-width="1.6" stroke-dasharray="4 3"/></svg>`; };
-export const ringSvg = (pct, c) => `<svg class="rg" viewBox="0 0 44 44" role="img" aria-label="${esc(fmtN(pct, 1))}%"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="22" cy="22" r="18" fill="none" stroke="var(--${c})" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(clamp(pct, 0, 100) * 1.131).toFixed(1)} 113.1" transform="rotate(-90 22 22)"/></svg>`;
-export const gaugeSvg = (v, max, c) => { const f = max > 0 && v != null ? clamp(v / max, 0, 1) : 0; return `<svg class="gg" viewBox="0 0 100 58" aria-hidden="true"><path d="M6 52A44 44 0 0 1 94 52" fill="none" stroke="var(--line)" stroke-width="9" stroke-linecap="round"/><path d="M6 52A44 44 0 0 1 94 52" fill="none" stroke="var(--${c})" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(f * 138.2).toFixed(1)} 138.2"/></svg>`; };
+export const tankSvg = (pct, low, key) => { const id = "tv" + (++VID), p = clamp(pct, 0, 100), h = 132 * p / 100, y = 134 - h, ly = 134 - 132 * low / 100; return `<svg class="vs" viewBox="0 0 76 136" role="img" aria-label="${esc(tl("Tank {pct}% full", { pct: Math.round(p) }))}"><defs><clipPath id="${id}"><rect x="2" y="2" width="72" height="132" rx="18"/></clipPath></defs><rect x="2" y="2" width="72" height="132" rx="18" fill="var(--waterbg)"/><g clip-path="url(#${id})" data-k="tank-${key}" data-t="tank" data-v="${p}"><rect x="2" y="${y}" width="72" height="${h}" fill="var(--water)"/><rect x="2" y="${y}" width="72" height="3" fill="#fff" opacity=".4"/></g><line x1="2" x2="74" y1="${ly}" y2="${ly}" stroke="var(--warn)" stroke-width="1.6" stroke-dasharray="4 3"/></svg>`; };
+export const ringSvg = (pct, c, key) => `<svg class="rg" viewBox="0 0 44 44" role="img" aria-label="${esc(fmtN(pct, 1))}%"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="6"/><circle data-k="ring-${key}" data-t="ring" data-v="${pct}" cx="22" cy="22" r="18" fill="none" stroke="var(--${c})" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(clamp(pct, 0, 100) * 1.131).toFixed(1)} 113.1" transform="rotate(-90 22 22)"/></svg>`;
+export const gaugeSvg = (v, max, c, key) => { const f = max > 0 && v != null ? clamp(v / max, 0, 1) : 0; return `<svg class="gg" viewBox="0 0 100 58" aria-hidden="true"><path d="M6 52A44 44 0 0 1 94 52" fill="none" stroke="var(--line)" stroke-width="9" stroke-linecap="round"/><path data-k="gauge-${key}" data-t="gauge" data-max="${max}" data-v="${v == null ? 0 : v}" d="M6 52A44 44 0 0 1 94 52" fill="none" stroke="var(--${c})" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(f * 138.2).toFixed(1)} 138.2"/></svg>`; };
 const tankState = pct => pct < S.thresholds.tankLowPct ? ["crit", tl("Almost empty")] : pct < S.thresholds.tankLowPct + 15 ? ["warn", tl("Getting low")] : pct > S.thresholds.tankHighPct ? ["warn", tl("Almost full")] : ["ok", tl("Good")];
 const pumpCard = p => {
   const st = statusM(p), pt = last(p.id), m = pt?.m || {}, h = healthM(p), t = today(p), off = st.c === "off", fl = has(p, "flow_lpm") ? m.flow_lpm : null, hc = off ? "off" : h.score >= 80 ? "ok" : h.score >= 60 ? "warn" : "crit";
   const why = tlx(off ? st.detail : st.c !== "ok" && st.alarms[0] ? st.alarms[0].title : (st.detail || "").replace(/\.$/, ""));
   return `<div class="pc ${st.c}" data-p="${p.id}" tabindex="0" role="link" aria-label="${esc(p.short)}"><div class="pch"><div class="pcn"><b>${esc(p.short)}</b><span>${esc(site(p.site).name.split(" — ")[0])} · ${esc(tlx(st.label))}</span></div>${condPill(st.c)}</div>
-   <div class="pcb"><div class="gw">${gaugeSvg(fl, p.Q, off ? "off" : "brand")}<div class="gv ${off ? "stale" : ""}">${fl == null ? nos() : `<b class="num">${fmtN(fl, 1)}</b><span>L/min</span>`}</div><div class="gl">${off ? tl("Old reading") : tl("Water flow")}</div></div>
-    <div class="pcs"><div><span class="k">${tl("Water today")}</span><b class="num">${fmtN(t.water, 1)}<small>m³</small></b></div><div><span class="k">${tl("Health")}</span><div class="hbr"><i style="width:${h.score}%;background:var(--${hc})"></i></div><b class="num">${h.score}</b></div></div></div>
+   <div class="pcb"><div class="gw">${gaugeSvg(fl, p.Q, off ? "off" : "brand", p.id)}<div class="gv ${off ? "stale" : ""}">${fl == null ? nos() : `<b class="num" data-k="fl-${p.id}" data-t="n" data-d="1" data-v="${fl}">${fmtN(fl, 1)}</b><span>L/min</span>`}</div><div class="gl">${off ? tl("Old reading") : tl("Water flow")}</div></div>
+    <div class="pcs"><div><span class="k">${tl("Water today")}</span><b class="num"><span data-k="wt-${p.id}" data-t="n" data-d="1" data-v="${t.water}">${fmtN(t.water, 1)}</span><small>m³</small></b></div><div><span class="k">${tl("Health")}</span><div class="hbr"><i data-k="hb-${p.id}" data-t="bar" data-v="${h.score}" style="width:100%;transform:scaleX(${h.score / 100});background:var(--${hc})"></i></div><b class="num" data-k="hs-${p.id}" data-t="n" data-d="0" data-v="${h.score}">${h.score}</b></div></div></div>
    <div class="pcw">${esc(why)}</div></div>`;
 };
 ROUTES.overview = () => {
@@ -227,9 +231,9 @@ ROUTES.overview = () => {
    <section class="panel ovm" aria-labelledby="map-h"><div class="hd"><div><h2 id="map-h">${tl("Your pumps and tanks")}</h2><p class="na" style="margin:2px 0 0">${tl("Tap a pump to see how it is doing.")}</p></div><span class="sp"></span><span class="legend"><span><span class="dot" style="background:var(--ok)"></span> ${tl("healthy")}</span><span><span class="dot" style="background:var(--warn)"></span> ${tl("attention")}</span><span><span class="dot" style="background:var(--crit)"></span> ${tl("critical")}</span><span><span class="dot" style="background:var(--off)"></span> ${tl("offline")}</span></span></div>
     <div class="map" id="map"><svg viewBox="0 0 ${W} ${Hm}" role="img" aria-label="${esc(tl("Map of pumps"))}">${g}</svg><div id="mpop"></div></div></section>
    <section class="panel ovw"><div class="bd"><span class="kl">${tl("Water pumped today")}</span>
-     <div class="wnum"><b class="num">${fmtN(k.water, 1)}</b><span>m³</span></div>
+     <div class="wnum"><b class="num" data-k="ov-water" data-t="n" data-d="1" data-v="${k.water}">${fmtN(k.water, 1)}</b><span>m³</span></div>
      <p class="small" style="margin:6px 0 0">${delta}</p>
-     ${tanks.length ? `<h3 style="margin:20px 0 10px">${tl("Tanks")}</h3><div class="tks">${tanks.map(tk => { const p = S.pumps.find(x => x.tank === tk.id), pct = SIM[p.id]?.tankPct ?? 0, [tc, tt] = tankState(pct); return `<div class="tk">${tankSvg(pct, S.thresholds.tankLowPct)}<div><b class="tn">${esc(tlx(tk.name))}</b><b class="num tp ${tc}">${fmtN(pct)}<small>%</small></b><span class="na">${tl("{cap} m³ capacity", { cap: tk.cap })}</span>${chipI(tc, tt)}</div></div>`; }).join("")}</div>` : ""}
+     ${tanks.length ? `<h3 style="margin:20px 0 10px">${tl("Tanks")}</h3><div class="tks">${tanks.map(tk => { const p = S.pumps.find(x => x.tank === tk.id), pct = SIM[p.id]?.tankPct ?? 0, [tc, tt] = tankState(pct); return `<div class="tk">${tankSvg(pct, S.thresholds.tankLowPct, tk.id)}<div><b class="tn">${esc(tlx(tk.name))}</b><b class="num tp ${tc}"><span data-k="tkn-${tk.id}" data-t="n" data-d="0" data-v="${pct}">${fmtN(pct)}</span><small>%</small></b><span class="na">${tl("{cap} m³ capacity", { cap: tk.cap })}</span>${chipI(tc, tt)}</div></div>`; }).join("")}</div>` : ""}
    </div></section>
   </div>
   <div class="ovl">
@@ -239,8 +243,8 @@ ROUTES.overview = () => {
    </section>
    <div class="kts" role="list">
     ${kt("pumps", "brand", tl("Pumps working"), `${k.running}<small>${tl("of {total}", { total: k.pumps })}</small>`)}
-    ${kt("sun", "solar", tl("Solar today"), `${fmtN(k.pv, 1)}<small>kWh</small>`)}
-    ${kt(ringSvg(k.avail, k.avail < 90 ? "warn" : "ok"), "ring", tl("Pumps ready today"), `<span class="${k.avail < 90 ? "warn" : "ok"}">${fmtN(k.avail, 1)}<small>%</small></span>`)}
+    ${kt("sun", "solar", tl("Solar today"), `<span data-k="ov-pv" data-t="n" data-d="1" data-v="${k.pv}">${fmtN(k.pv, 1)}</span><small>kWh</small>`)}
+    ${kt(ringSvg(k.avail, k.avail < 90 ? "warn" : "ok", "avail"), "ring", tl("Pumps ready today"), `<span class="${k.avail < 90 ? "warn" : "ok"}"><span data-k="ov-av" data-t="n" data-d="1" data-v="${k.avail}">${fmtN(k.avail, 1)}</span><small>%</small></span>`)}
     ${kt("check", k.crit ? "crit" : "ok", tl("Critical alerts"), String(k.crit))}
    </div>
   </div>

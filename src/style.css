@@ -5,6 +5,8 @@
   --water:#1456C8; --waterbg:#E4EDFB; --solar:#F2B33D; --solarink:#7A4F00; --power:#7A4FB5; --well:#0A7F77; --press:#B5523B;
   --focus:#0A7F77; --onbrand:#FFFFFF; --float:0 10px 28px rgb(16 32 30 / .12); --navtxt:#C9D6D3;
   --r1:6px; --r2:10px; --r3:16px; --r4:20px;
+  --m-instant:90ms; --m-quick:160ms; --m-base:280ms; --m-large:420ms;
+  --e-out:cubic-bezier(.2,.8,.2,1); --e-in:cubic-bezier(.4,0,1,1); --e-inout:cubic-bezier(.4,0,.2,1);
   --num:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
   --sans:"Figtree","Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:light;
@@ -30,7 +32,7 @@ body{margin:0;height:100%;background:var(--paper);color:var(--ink);font:15px/1.4
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--brandd)}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
 
 /* shell */
 .app{display:grid;grid-template-columns:248px minmax(0,1fr);height:100%}
@@ -261,7 +263,7 @@ details pre,.code{background:var(--paper);border:1px solid var(--line2);border-r
 @media (max-width:1100px){.g-main{grid-template-columns:minmax(0,1fr)}.qs{grid-template-columns:repeat(3,minmax(0,1fr))}.q:nth-child(-n+3){border-bottom:1px solid var(--line2)}}
 @media (max-width:900px){
   .app{grid-template-columns:minmax(0,1fr)}
-  .side{position:fixed;inset:0 auto 0 0;width:260px;z-index:45;transform:translateX(-100%);transition:transform .2s}
+  .side{position:fixed;inset:0 auto 0 0;width:260px;z-index:45;transform:translateX(-100%);transition:transform var(--m-large) var(--e-out)}
   .side.open{transform:none;box-shadow:0 0 0 100vmax rgba(5,20,13,.45)}
   .menu-btn{display:inline-block}
   .g2,.g3,.chgrid{grid-template-columns:minmax(0,1fr)}
@@ -477,3 +479,22 @@ details pre,.code{background:var(--paper);border:1px solid var(--line2);border-r
 }
 .tech summary{font-size:13px;color:var(--ink3);margin-top:0}
 .tech .pmeta{margin-top:6px}
+
+/* ---------- motion (see MOTION.md) ---------- */
+@supports (transition-timing-function:linear(0,1)){
+  :root{--spring-smooth:linear(0,.097,.282,.466,.619,.736,.821,.881,.921,.949,.967,.979,.986,.991,.995,.997,1);--spring-snappy:linear(0,.145,.404,.637,.803,.907,.964,.992,1.003,1.006,1.006,1.004,1.003,1.001,1)}
+  @media (max-width:900px){.side{transition:transform var(--m-large) var(--spring-snappy)}}
+}
+.btn,.pc,.kt,.nav a,.bnav a,.bnav button,.seg button,.tabs button,.ai{transition:transform var(--m-instant) var(--e-out),background-color var(--m-quick) var(--e-out),border-color var(--m-quick) var(--e-out),color var(--m-quick) var(--e-out)}
+.btn:active,.pc:active,.kt:active,.bnav a:active,.bnav button:active,.seg button:active{transform:scale(.97)}
+.nav a:active,.ai:active{transform:scale(.99)}
+.hbr i{transform-origin:left center;will-change:transform}
+.chip,.pill{transition:background-color var(--m-quick) var(--e-out),color var(--m-quick) var(--e-out)}
+@keyframes route-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.view.route-in{animation:route-in var(--m-base) var(--e-out)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important}
+  .side{transition:none!important}
+  .btn,.pc,.kt,.nav a,.bnav a,.bnav button,.seg button,.tabs button,.ai{transition:background-color 120ms,border-color 120ms,color 120ms!important}
+  .btn:active,.pc:active,.kt:active,.nav a:active,.bnav a:active,.bnav button:active,.seg button:active,.ai:active{transform:none!important}
+}

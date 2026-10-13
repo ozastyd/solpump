@@ -48,6 +48,7 @@ PNG + all six, sets `globalThis.LOGO`, then `boot()`). Order inside `build.sh` m
 - `src/core.js` — state `S`, simulator `SIM`, time-series `TS`, seeding, device ingestion, alert rules,
   commands, audit, formatters, `$`, `toast`. Timezone hardcoded UTC+7 (WIB).
 - `src/intel.js` — daily rollups/downsampling, health score, rule diagnostics, well analytics.
+- `src/motion.js` — `settle()` tweens elements marked `data-k`/`data-t`/`data-v` from their previous value after each render (see `MOTION.md`).
 - `src/ui1.js` — router (`ROUTES` / `renderAll` / `setView`), login, shell+nav, overview, map, icons,
   hand-rolled SVG charts (`lineChart`, `barChart`), `DRAWER` registry.
 - `src/ui2.js` — modal, pump detail page + tabs, alarm acknowledge.

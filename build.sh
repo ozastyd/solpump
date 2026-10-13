@@ -17,7 +17,7 @@ def classic(f):
     return '\n'.join(re.sub(r'^export ', '', l).replace('; export ', '; ') for l in lines)
 logo=base64.b64encode(open('assets/logo.png','rb').read()).decode()
 css=open('src/style.css', encoding=ENC).read()
-js="\n".join(classic(f) for f in ['id-core.js','id-intel.js','id-ui1.js','id-ui2.js','id-ui3.js','id-ui4.js','i18n.js','core.js','intel.js','ui1.js','ui2.js','ui3.js','ui4.js'])
+js="\n".join(classic(f) for f in ['id-core.js','id-intel.js','id-ui1.js','id-ui2.js','id-ui3.js','id-ui4.js','i18n.js','core.js','intel.js','motion.js','ui1.js','ui2.js','ui3.js','ui4.js'])
 html=f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
