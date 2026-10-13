@@ -22,7 +22,7 @@ html=f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SolPump Operations — Assalaam</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi-Condensed:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&family=Barlow+Semi-Condensed:wght@500;600&display=swap" rel="stylesheet">
 <style>{css}</style></head>
 <body><div style="padding:40px;font:16px system-ui">Loading 30 days of simulated field data…</div>
 <script>

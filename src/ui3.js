@@ -206,12 +206,13 @@ ROUTES.pumps = () => {
     const stale = off ? tl("stale · last known") : "";
     return `<article class="pcard">
      <div class="ph"><span class="pn">${esc(p.short)}</span><span class="stx-w">${stCell(st)}</span></div>
-     <div class="pmeta">${esc(site(p.site).name.split(" — ")[0])} · ${esc(well(p).name)}<br>${esc(p.mfr)} ${esc(p.model)} · SN ${esc(p.sn)}<br><span class="na">${off ? esc(st.detail) : "IoT: " + esc(st.iot.t) + " · " + esc(st.iot.d)}</span></div>
+     <div class="pmeta">${esc(site(p.site).name.split(" — ")[0])} · ${esc(well(p).name)}<br><span class="na">${off ? esc(tlx(st.detail)) : ""}</span></div>
+      <details class="tech"><summary>${tl("Technical details")}</summary><div class="pmeta">${esc(p.mfr)} ${esc(p.model)} · SN ${esc(p.sn)}<br><span class="na">${"IoT: " + esc(tlx(st.iot.t)) + " · " + esc(tlx(st.iot.d))}</span></div></details>
      <div class="row small" style="justify-content:space-between"><span>${hbar(h.score)}</span><span class="na" title="${esc(h.reasons[0]?.txt || tl("No open findings"))}">${esc(h.reasons[0]?.txt || tl("No open findings"))}</span></div>
      ${top ? `<div class="pdg ${top.sev}"><b>${esc(r.top1)}</b><div class="act">${esc(top.action.split(/(?<=\.)\s/)[0])}</div></div>` : ""}
      <div class="tel">
-      ${cell(tl("Hydraulic flow"), !has(p, "flow_lpm") ? noS(tl("no sensor")) : `${fmtN(r.flow, 1)}<small>L/min</small>`, !has(p, "flow_lpm") ? "" : stale || (st.pump === "running" && perf ? `<b style="color:var(--${perf >= 0.85 ? "ok" : "warn"})">${Math.round(perf * 100)}%</b> ${tl("of expected at this power")}` : st.pump === "running" ? tl("no baseline yet") : ""))}
-      ${cell(tl("Pump power"), !has(p, "pump_power") ? noS(tl("no sensor")) : `${fmtN(r.kw, 2)}<small>kW</small>`, !has(p, "pump_power") ? "" : stale || tl("{n}% of {r} kW rated", { n: Math.round((m.pump_power || 0) / p.P * 100), r: r1(p.P / 1000) }))}
+      ${cell(tl("Water flow"), !has(p, "flow_lpm") ? noS(tl("no sensor")) : `${fmtN(r.flow, 1)}<small>L/min</small>`, !has(p, "flow_lpm") ? "" : stale || (st.pump === "running" && perf ? `<b style="color:var(--${perf >= 0.85 ? "ok" : "warn"})">${Math.round(perf * 100)}%</b> ${tl("of expected at this power")}` : st.pump === "running" ? tl("no baseline yet") : ""))}
+      ${cell(tl("Power use"), !has(p, "pump_power") ? noS(tl("no sensor")) : `${fmtN(r.kw, 2)}<small>kW</small>`, !has(p, "pump_power") ? "" : stale || tl("{n}% of {r} kW rated", { n: Math.round((m.pump_power || 0) / p.P * 100), r: r1(p.P / 1000) }))}
        ${cell(tl("Well level"), w ? `${r1(w.level)}<small>${tl("m below")}</small>` : noS(tl("no sensor")), w ? tl("static {s} m · drawdown {d} m", { s: r1(well(p).static), d: r1(w.drawdown) }) : tl("static {s} m from drilling log", { s: r1(well(p).static) }))}
       ${cell(tl("Water today"), `${fmtN(t.water, 1)}<small>m³</small>`, `${tl("{d} runtime", { d: fmtDur(t.run) })}${off ? tl(" · partial") : ""}`)}
      </div>

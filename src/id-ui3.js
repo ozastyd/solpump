@@ -1,5 +1,7 @@
 /* Indonesian dictionary — ui3. Key = the exact English string passed to tl()/tlk(); value = Indonesian. Keep {placeholders} identical. */
 export const ID_UI3 = {
+  "Technical details": "Detail teknis",
+  "Power use": "Pemakaian daya",
   "Active": "Aktif", "Acknowledged": "Dikonfirmasi", "Cleared": "Teratasi", "All": "Semua",
   "{n} alerts": "{n} peringatan", "How alerts work": "Cara kerja peringatan",
   "Duplicates are merged (count shows repeats); alerts wait for the condition to persist, clear with hysteresis, and observe a {m}-minute cooldown.": "Duplikat digabung (angka menunjukkan pengulangan); peringatan menunggu kondisi bertahan, teratasi dengan histeresis, dan mengikuti jeda {m} menit.",

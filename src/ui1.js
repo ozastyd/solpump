@@ -36,6 +36,11 @@ export const IC = {
   blueprint: '<path d="M4 4h16v16H4zM4 10h16M10 10v10" fill="none" stroke="currentColor" stroke-width="1.8"/>',
   pumps: '<circle cx="9" cy="11" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="11" r="1.4" fill="currentColor"/><path d="M9 6V3h7M14 11h6M5 18h8" fill="none" stroke="currentColor" stroke-width="1.8"/>',
 };
+IC.menu = '<path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+IC.sun = '<circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>';
+IC.check = '<path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+IC.warn = '<path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+IC.off = '<path d="M2 2l20 20M8.5 8.5A7 7 0 0 0 5 12a7 7 0 0 0 11 5.7M12 5a7 7 0 0 1 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 export const svgI = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
 
 /* ---------- charts (dependency-free SVG, downsampled by bucket) ---------- */
@@ -116,6 +121,9 @@ export function renderTop(title, crumb) {
    <button class="btn sm" id="b-bell" aria-label="${esc(tl("Notifications"))}">🔔 ${unread ? `<b class="num">${unread}</b>` : ""}</button>
    <div class="who"><span class="lbl muted">${tl("Signed in as")}</span><b>${esc(u.name)}</b><span class="pill plain off">${esc(tlx(ROLES[u.role].label))}</span><button class="btn sm" id="b-out">${tl("Switch user")}</button></div>`;
   $("#mb").onclick = () => $("#side").classList.toggle("open");
+  const cur = location.hash.slice(2).split("/")[0] || "overview";
+  $("#bnav").innerHTML = [["overview", tl("Overview"), "overview"], ["map", tl("Map"), "map"], ["alerts", tl("Alerts"), "alerts"], ["pumps", tl("Pumps"), "pumps"]].map(([h, l, i]) => `<a href="#/${h}" class="${cur === h || (cur === "pump" && h === "pumps") ? "on" : ""}">${svgI(i)}<span>${esc(l)}</span></a>`).join("") + `<button id="b-more" aria-label="${esc(tl("More"))}">${svgI("menu")}<span>${tl("More")}</span></button>`;
+  $("#b-more").onclick = () => $("#side").classList.toggle("open");
   $("#b-pause").onclick = () => { S.paused = true; renderTop(title, crumb); };
   $("#b-play").onclick = () => { S.paused = false; S.speed = 1; renderTop(title, crumb); };
   $("#b-ff").onclick = () => { S.paused = false; S.speed = 10; renderTop(title, crumb); };
@@ -136,7 +144,7 @@ export function renderLogin() {
 export function login(uid_) {
   const u = user(uid_); S.session = { userId: u.id, role: u.role }; S.orgId = u.org;
   audit(u.id, "Login", null, null, ROLES[u.role].label);
-  document.body.innerHTML = `<div class="app"><aside class="side" id="side"></aside><div class="main"><header class="top" id="top"></header><main class="view" id="view" tabindex="-1"></main></div></div><div id="modal"></div><div class="toasts" id="toasts"></div><div id="drawer"></div>`;
+  document.body.innerHTML = `<div class="app"><aside class="side" id="side"></aside><div class="main"><header class="top" id="top"></header><main class="view" id="view" tabindex="-1"></main></div></div><nav class="bnav" id="bnav" aria-label="Main"></nav><div id="modal"></div><div class="toasts" id="toasts"></div><div id="drawer"></div>`;
   if (location.hash.length < 3 || location.hash === "#/") location.hash = u.role === "tech" ? "#/maintenance" : "#/overview";
   renderAll();
 }
@@ -187,6 +195,20 @@ export function fleetRow(p) {
    <td class="r" data-l="${esc(tl("Water today"))}"><span class="num">${fmtN(t.water, 1)}</span> <span class="na">m³</span></td><td class="r opt num">${fmtDur(t.run)}</td><td data-l="${esc(tl("Health"))}">${hbar(h.score)}</td>
    <td class="opt"><span class="${(S.now - (pt?.t || 0)) > 15 * MIN ? "" : "muted"}">${fmtAgo(pt?.t)}</span><div class="na">${tl("IoT: {s}", { s: tlx(st.iot.t).toLowerCase() })}</div></td></tr>`;
 }
+let VID = 0;
+const chipI = (c, t) => `<span class="chip ${c}"><svg viewBox="0 0 24 24" aria-hidden="true">${IC[c === "ok" ? "check" : c === "off" ? "off" : "warn"]}</svg>${esc(t)}</span>`;
+export const tankSvg = (pct, low) => { const id = "tv" + (++VID), p = clamp(pct, 0, 100), h = 132 * p / 100, y = 134 - h, ly = 134 - 132 * low / 100; return `<svg class="vs" viewBox="0 0 76 136" role="img" aria-label="${esc(tl("Tank {pct}% full", { pct: Math.round(p) }))}"><defs><clipPath id="${id}"><rect x="2" y="2" width="72" height="132" rx="18"/></clipPath></defs><rect x="2" y="2" width="72" height="132" rx="18" fill="var(--waterbg)"/><g clip-path="url(#${id})"><rect x="2" y="${y}" width="72" height="${h}" fill="var(--water)"/><rect x="2" y="${y}" width="72" height="3" fill="#fff" opacity=".4"/></g><line x1="2" x2="74" y1="${ly}" y2="${ly}" stroke="var(--warn)" stroke-width="1.6" stroke-dasharray="4 3"/></svg>`; };
+export const ringSvg = (pct, c) => `<svg class="rg" viewBox="0 0 44 44" role="img" aria-label="${esc(fmtN(pct, 1))}%"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="22" cy="22" r="18" fill="none" stroke="var(--${c})" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(clamp(pct, 0, 100) * 1.131).toFixed(1)} 113.1" transform="rotate(-90 22 22)"/></svg>`;
+export const gaugeSvg = (v, max, c) => { const f = max > 0 && v != null ? clamp(v / max, 0, 1) : 0; return `<svg class="gg" viewBox="0 0 100 58" aria-hidden="true"><path d="M6 52A44 44 0 0 1 94 52" fill="none" stroke="var(--line)" stroke-width="9" stroke-linecap="round"/><path d="M6 52A44 44 0 0 1 94 52" fill="none" stroke="var(--${c})" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(f * 138.2).toFixed(1)} 138.2"/></svg>`; };
+const tankState = pct => pct < S.thresholds.tankLowPct ? ["crit", tl("Almost empty")] : pct < S.thresholds.tankLowPct + 15 ? ["warn", tl("Getting low")] : pct > S.thresholds.tankHighPct ? ["warn", tl("Almost full")] : ["ok", tl("Good")];
+const pumpCard = p => {
+  const st = statusM(p), pt = last(p.id), m = pt?.m || {}, h = healthM(p), t = today(p), off = st.c === "off", fl = has(p, "flow_lpm") ? m.flow_lpm : null, hc = off ? "off" : h.score >= 80 ? "ok" : h.score >= 60 ? "warn" : "crit";
+  const why = tlx(off ? st.detail : st.c !== "ok" && st.alarms[0] ? st.alarms[0].title : (st.detail || "").replace(/\.$/, ""));
+  return `<div class="pc ${st.c}" data-p="${p.id}" tabindex="0" role="link" aria-label="${esc(p.short)}"><div class="pch"><div class="pcn"><b>${esc(p.short)}</b><span>${esc(site(p.site).name.split(" — ")[0])} · ${esc(tlx(st.label))}</span></div>${condPill(st.c)}</div>
+   <div class="pcb"><div class="gw">${gaugeSvg(fl, p.Q, off ? "off" : "brand")}<div class="gv ${off ? "stale" : ""}">${fl == null ? nos() : `<b class="num">${fmtN(fl, 1)}</b><span>L/min</span>`}</div><div class="gl">${off ? tl("Old reading") : tl("Water flow")}</div></div>
+    <div class="pcs"><div><span class="k">${tl("Water today")}</span><b class="num">${fmtN(t.water, 1)}<small>m³</small></b></div><div><span class="k">${tl("Health")}</span><div class="hbr"><i style="width:${h.score}%;background:var(--${hc})"></i></div><b class="num">${h.score}</b></div></div></div>
+   <div class="pcw">${esc(why)}</div></div>`;
+};
 ROUTES.overview = () => {
   const ps = myPumps(), k = fleetKpis(ps), items = attentionItems();
   const nCrit = items.filter(i => i.c === "crit").length, nP = new Set(items.map(i => i.p.id)).size;
@@ -196,64 +218,74 @@ ROUTES.overview = () => {
   const y = dk(S.now) - 1, tY = ps.reduce((s, p) => s + (daily(p).find(g => g.day === y)?.water || 0), 0);
   const hNow = lh(S.now), ySame = ps.reduce((s, p) => s + window_(p.id, S.now - D - hNow * H, S.now - D).reduce((a, x) => a + (x.m.flow_lpm || 0) * x.dt / 1000, 0), 0);
   const tanks = scoped(S.tanks);
-  const shown = items.slice(0, 7);
-  const bw = ps.map(p => ({ n: p.short, v: today(p).water })).sort((a, b) => b.v - a.v), bwMax = Math.max(...bw.map(x => x.v), 1);
-  const brow = (label, val, pct, c) => `<div class="brow"><div class="bt"><span>${label}</span><b class="num">${val}</b></div><div class="track"><i style="width:${clamp(pct, 0, 100)}%;background:${c}"></i></div></div>`;
+  const shown = items.slice(0, 4);
+  const { g, W, Hm } = ps.length ? mapSvg(ps, true) : { g: "", W: 1000, Hm: 400 };
+  const delta = ySame > 0.5 ? (k.water >= ySame ? tl("Up {pct}% on yesterday at the same time ({prev} m³). Yesterday's total: {tot} m³.", { pct: Math.abs(Math.round((k.water / ySame - 1) * 100)), prev: fmtN(ySame, 1), tot: fmtN(tY, 1) }) : tl("Down {pct}% on yesterday at the same time ({prev} m³). Yesterday's total: {tot} m³.", { pct: Math.abs(Math.round((k.water / ySame - 1) * 100)), prev: fmtN(ySame, 1), tot: fmtN(tY, 1) })) : "";
+  const kt = (ic, tone, label, val) => `<div class="kt" role="listitem"><span class="ki ${tone}">${ic.startsWith("<") ? ic : `<svg viewBox="0 0 24 24" aria-hidden="true">${IC[ic]}</svg>`}</span><div><span class="kl">${label}</span><b class="kv2 num ${tone}">${val}</b></div></div>`;
   setView(`
-  <div class="grid g-main" style="margin-bottom:16px">
-   <section class="panel" aria-labelledby="att-h"><div class="hd"><h2 id="att-h">${tl("What needs attention")}</h2><span class="sp"></span><a href="#/alerts" class="small">${tl("All alerts")}</a></div>
-    <div class="bd" style="padding-bottom:4px"><p class="lead-sum">${sum}</p></div>
-    <div class="attn">${items.length ? shown.map(i => `<div class="it" data-p="${i.p.id}" data-tab="${i.key === "maint" ? "maintenance" : "diagnostics"}" tabindex="0" role="link"><span class="bar" style="background:var(--${i.c})"></span><div class="ib"><div class="t">${esc(i.t)}</div><div class="m">${esc(i.p.short)} · ${esc(site(i.p.site).name.split(" — ")[0])}${pill(i.c, i.sev === "critical" ? tl("Critical") : tl("Plan this"))}</div></div><div class="act">${esc(i.act)}</div></div>`).join("") + (items.length > shown.length ? `<div class="attn-f">${tl("Showing the {n} most urgent of {total} issues", { n: shown.length, total: items.length })} · <a href="#/alerts">${tl("see all alerts")}</a></div>` : "") : `<div class="bd muted">${tl("Nothing to do. We'll flag problems here the moment they appear.")}</div>`}</div>
-   </section>
-   <section class="panel"><div class="hd"><h2>${tl("Water today")}</h2><span class="sp"></span><span class="na">${tl("until {time}", { time: fmtTime(S.now) })}</span></div><div class="bd">
-     <div class="row" style="align-items:baseline;gap:6px"><span class="num" style="font-size:40px;font-weight:600;line-height:1">${fmtN(k.water, 1)}</span><span class="muted">${tl("m³ pumped")}</span></div>
-     <p class="small" style="margin-top:6px">${ySame > 0.5 ? (k.water >= ySame ? tl("Up {pct}% on yesterday at the same time ({prev} m³). Yesterday's total: {tot} m³.", { pct: Math.abs(Math.round((k.water / ySame - 1) * 100)), prev: fmtN(ySame, 1), tot: fmtN(tY, 1) }) : tl("Down {pct}% on yesterday at the same time ({prev} m³). Yesterday's total: {tot} m³.", { pct: Math.abs(Math.round((k.water / ySame - 1) * 100)), prev: fmtN(ySame, 1), tot: fmtN(tY, 1) })) : ""}</p>
-     <dl class="kv" style="margin:10px 0 0"><dt>${tl("Solar energy")}</dt><dd class="num">${fmtN(k.pv, 1)} kWh</dd><dt>${tl("Energy per m³")}</dt><dd class="num">${k.water > 0.5 ? (k.pe / k.water).toFixed(2) + " kWh/m³" : "—"}</dd><dt>${tl("Water per kWh")}</dt><dd class="num">${k.pe > 0.1 ? fmtN(k.water * 1000 / k.pe, 0) + " L/kWh" : "—"}</dd></dl>
-     ${bw.length ? `<h3 style="margin:18px 0 0">${tl("Water by well")}</h3><div class="blist">${bw.map(x => brow(esc(x.n), `${fmtN(x.v, 1)} m³`, x.v / bwMax * 100, "var(--well)")).join("")}</div>` : ""}
-     ${tanks.length ? `<h3 style="margin:18px 0 0">${tl("Tanks")}</h3><div class="blist">${tanks.map(tk => { const p = S.pumps.find(x => x.tank === tk.id); const pct = SIM[p.id]?.tankPct ?? 0; return brow(`${esc(tlx(tk.name))} <span class="na">${tk.cap} m³</span>`, `${fmtN(pct)}%`, pct, pct < S.thresholds.tankLowPct ? "var(--crit)" : "var(--water)"); }).join("")}</div>` : ""}
+  <div class="ovh">
+   <section class="panel ovm" aria-labelledby="map-h"><div class="hd"><div><h2 id="map-h">${tl("Your pumps and tanks")}</h2><p class="na" style="margin:2px 0 0">${tl("Tap a pump to see how it is doing.")}</p></div><span class="sp"></span><span class="legend"><span><span class="dot" style="background:var(--ok)"></span> ${tl("healthy")}</span><span><span class="dot" style="background:var(--warn)"></span> ${tl("attention")}</span><span><span class="dot" style="background:var(--crit)"></span> ${tl("critical")}</span><span><span class="dot" style="background:var(--off)"></span> ${tl("offline")}</span></span></div>
+    <div class="map" id="map"><svg viewBox="0 0 ${W} ${Hm}" role="img" aria-label="${esc(tl("Map of pumps"))}">${g}</svg><div id="mpop"></div></div></section>
+   <section class="panel ovw"><div class="bd"><span class="kl">${tl("Water pumped today")}</span>
+     <div class="wnum"><b class="num">${fmtN(k.water, 1)}</b><span>m³</span></div>
+     <p class="small" style="margin:6px 0 0">${delta}</p>
+     ${tanks.length ? `<h3 style="margin:20px 0 10px">${tl("Tanks")}</h3><div class="tks">${tanks.map(tk => { const p = S.pumps.find(x => x.tank === tk.id), pct = SIM[p.id]?.tankPct ?? 0, [tc, tt] = tankState(pct); return `<div class="tk">${tankSvg(pct, S.thresholds.tankLowPct)}<div><b class="tn">${esc(tlx(tk.name))}</b><b class="num tp ${tc}">${fmtN(pct)}<small>%</small></b><span class="na">${tl("{cap} m³ capacity", { cap: tk.cap })}</span>${chipI(tc, tt)}</div></div>`; }).join("")}</div>` : ""}
    </div></section>
   </div>
-  <div class="kpis" role="list" style="margin-bottom:16px">
-   ${[[tl("Sites"), k.sites, ""], [tl("Pumps"), k.pumps, ""], [tl("Running"), k.running, "ok"], [tl("Stopped"), k.stopped, ""], [tl("Faulted"), k.faulted, k.faulted ? "crit" : ""], [tl("Offline"), k.offline, k.offline ? "off" : ""], [tl("Water today"), fmtN(k.water, 1) + "<small>m³</small>", ""], [tl("Solar today"), fmtN(k.pv, 1) + "<small>kWh</small>", ""], [tl("Availability today"), fmtN(k.avail, 1) + "<small>%</small>", k.avail < 90 ? "warn" : ""], [tl("Critical alerts"), k.crit, k.crit ? "crit" : "ok"]].map(([l, v, c]) => `<div class="kpi ${c}" role="listitem"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("")}
+  <div class="ovl">
+   <section class="panel" aria-labelledby="att-h"><div class="hd"><h2 id="att-h">${tl("What needs attention")}</h2><span class="sp"></span><a href="#/alerts" class="small lk">${tl("All alerts")}</a></div>
+    <div class="bd" style="padding-bottom:6px"><p class="lead-sum">${sum}</p></div>
+    <div class="al2">${items.length ? shown.map(i => `<div class="ai ${i.c}" data-p="${i.p.id}" data-tab="${i.key === "maint" ? "maintenance" : "diagnostics"}" tabindex="0" role="link"><span class="ki ${i.c}"><svg viewBox="0 0 24 24" aria-hidden="true">${IC[i.c === "off" ? "off" : "warn"]}</svg></span><div class="ib"><div class="t">${esc(i.t)}</div><div class="m">${esc(i.p.short)} · ${esc(site(i.p.site).name.split(" — ")[0])}</div><div class="act">${esc(i.act)}</div></div>${pill(i.c, i.sev === "critical" ? tl("Critical") : tl("Plan this"))}</div>`).join("") + (items.length > shown.length ? `<div class="attn-f">${tl("Showing the {n} most urgent of {total} issues", { n: shown.length, total: items.length })} · <a href="#/alerts">${tl("see all alerts")}</a></div>` : "") : `<div class="bd muted">${tl("Nothing to do. We'll flag problems here the moment they appear.")}</div>`}</div>
+   </section>
+   <div class="kts" role="list">
+    ${kt("pumps", "brand", tl("Pumps working"), `${k.running}<small>${tl("of {total}", { total: k.pumps })}</small>`)}
+    ${kt("sun", "solar", tl("Solar today"), `${fmtN(k.pv, 1)}<small>kWh</small>`)}
+    ${kt(ringSvg(k.avail, k.avail < 90 ? "warn" : "ok"), "ring", tl("Pumps ready today"), `<span class="${k.avail < 90 ? "warn" : "ok"}">${fmtN(k.avail, 1)}<small>%</small></span>`)}
+    ${kt("check", k.crit ? "crit" : "ok", tl("Critical alerts"), String(k.crit))}
+   </div>
   </div>
-  <section class="panel"><div class="hd"><h2>${tl("Fleet")}</h2><span class="sp"></span>
-   <div class="seg" role="group" aria-label="${esc(tl("Filter by site"))}"><button data-site="all" class="${UI.site === "all" ? "on" : ""}">${tl("All sites")}</button>${sites.map(s => `<button data-site="${s}" class="${UI.site === s ? "on" : ""}">${esc(site(s).name.split(" — ")[0])}</button>`).join("")}</div>
-   <span class="legend"><span><span class="dot" style="background:var(--ok)"></span> ${tl("healthy")}</span><span><span class="dot" style="background:var(--warn)"></span> ${tl("attention")}</span><span><span class="dot" style="background:var(--crit)"></span> ${tl("critical")}</span><span><span class="dot" style="background:var(--off)"></span> ${tl("offline")}</span></span></div>
-    <div class="tw"><table class="fleet"><thead><tr><th scope="col">${tl("Asset")}</th><th scope="col">${tl("Status")}</th><th scope="col" class="r">${tl("Flow")}</th><th scope="col" class="r opt">${tl("Pump power")}</th><th scope="col" class="r opt">${tl("PV power")}</th><th scope="col" class="r opt">${tl("Well level")}</th><th scope="col" class="r">${tl("Water today")}</th><th scope="col" class="r opt">${tl("Runtime")}</th><th scope="col">${tl("Health")}</th><th scope="col" class="opt">${tl("Last update")}</th></tr></thead><tbody>${filt.length ? filt.map(fleetRow).join("") : `<tr><td colspan="10" class="muted">${tl("No pumps visible to you yet.")}</td></tr>`}</tbody></table></div></section>`);
-  return { title: tl("Fleet overview"), after() { bindRows(); document.querySelectorAll("[data-site]").forEach(b => b.onclick = () => { UI.site = b.dataset.site; renderAll(true); }); } };
+  <section class="pcs-wrap"><div class="row" style="margin:0 0 12px;gap:14px"><h2 style="font-size:20px">${tl("Pumps")}</h2><span class="sp" style="flex:1"></span>
+   <div class="seg" role="group" aria-label="${esc(tl("Filter by site"))}"><button data-site="all" class="${UI.site === "all" ? "on" : ""}">${tl("All sites")}</button>${sites.map(s => `<button data-site="${s}" class="${UI.site === s ? "on" : ""}">${esc(site(s).name.split(" — ")[0])}</button>`).join("")}</div></div>
+   <div class="pgrid2">${filt.length ? filt.map(pumpCard).join("") : `<div class="muted">${tl("No pumps visible to you yet.")}</div>`}</div></section>`);
+  return { title: tl("Fleet overview"), after() { bindRows(); bindMap(); document.querySelectorAll("[data-site]").forEach(b => b.onclick = () => { UI.site = b.dataset.site; renderAll(true); }); } };
 };
 export function bindRows() { document.querySelectorAll("[data-p]").forEach(r => { const f = () => go(`#/pump/${r.dataset.p}${r.dataset.tab ? "/" + r.dataset.tab : ""}`); r.onclick = f; r.onkeydown = e => { if (e.key === "Enter") f(); }; }); }
 
 /* ---------- MAP ---------- */
-ROUTES.map = () => {
-  const ps = myPumps(); if (!ps.length) { setView(`<div class="panel"><div class="bd">${tl("No assets you can see yet.")}</div></div>`); return { title: tl("Map") }; }
+export function mapSvg(ps, simple) {
   const lats = ps.map(p => p.lat), lngs = ps.map(p => p.lng);
   const cLat = (Math.max(...lats) + Math.min(...lats)) / 2, kx = Math.cos(cLat * Math.PI / 180);
   let x0 = Math.min(...lngs) * kx, x1 = Math.max(...lngs) * kx, y0 = Math.min(...lats), y1 = Math.max(...lats);
   const pad = Math.max(x1 - x0, y1 - y0) * 0.22 + 0.002; x0 -= pad; x1 += pad; y0 -= pad; y1 += pad;
-  const W = 1000, Hh = Math.round(W * (y1 - y0) / (x1 - x0)); const Hm = clamp(Hh, 380, 640);
+  const W = 1000, Hh = Math.round(W * (y1 - y0) / (x1 - x0)); const Hm = clamp(Hh, simple ? 520 : 380, 640);
   const sx = W / (x1 - x0), sy = Hm / (y1 - y0), s_ = Math.min(sx, sy);
   const P = (lat, lng) => [(lng * kx - x0) * s_ + (W - (x1 - x0) * s_) / 2, (y1 - lat) * s_ + (Hm - (y1 - y0) * s_) / 2];
   const km = 111.32 * s_ * 1; // px per degree → px per km = s_/111.32
   const pxKm = s_ / 111.32;
-  let g = `<defs><pattern id="gd" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="var(--line2)"/></pattern></defs><rect width="${W}" height="${Hm}" fill="url(#gd)"/>`;
+  let g = simple ? "" : `<defs><pattern id="gd" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="var(--line2)"/></pattern></defs><rect width="${W}" height="${Hm}" fill="url(#gd)"/>`;
   // a river and road (schematic context)
   g += `<path d="M-20 ${Hm * 0.78} C ${W * 0.25} ${Hm * 0.62}, ${W * 0.45} ${Hm * 0.95}, ${W + 20} ${Hm * 0.7}" stroke="var(--water)" stroke-opacity=".18" stroke-width="14" fill="none"/>`;
   g += `<path d="M ${W * 0.08} -10 L ${W * 0.52} ${Hm + 10}" stroke="var(--line)" stroke-width="6" fill="none"/>`;
   for (const sid of new Set(ps.map(p => p.site))) { const sp = ps.filter(p => p.site === sid).map(p => P(p.lat, p.lng)); const cx = sp.reduce((a, b) => a + b[0], 0) / sp.length, cy = sp.reduce((a, b) => a + b[1], 0) / sp.length; const r = Math.max(70, ...sp.map(q => Math.hypot(q[0] - cx, q[1] - cy) + 55)); g += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--brand)" fill-opacity=".05" stroke="var(--brand)" stroke-opacity=".35" stroke-dasharray="4 5"/><text x="${cx}" y="${cy - r - 8}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink2)">${esc(site(sid).name)}</text>`; }
   const tks = {}; for (const p of ps) { const tp = P(p.lat, p.lng); (tks[p.tank] = tks[p.tank] || []).push(tp); }
-  for (const [tid, l] of Object.entries(tks)) { const cx = l.reduce((a, b) => a + b[0], 0) / l.length + 30, cy = l.reduce((a, b) => a + b[1], 0) / l.length - 34; for (const q of l) g += `<line x1="${q[0]}" y1="${q[1]}" x2="${cx}" y2="${cy}" stroke="var(--water)" stroke-width="2" stroke-opacity=".5"/>`; const tk = byId(S.tanks, tid), pct = SIM[S.pumps.find(p => p.tank === tid).id].tankPct || 0; g += `<g><rect x="${cx - 13}" y="${cy - 16}" width="26" height="32" rx="3" fill="var(--card)" stroke="var(--water)" stroke-width="1.5"/><rect x="${cx - 11}" y="${cy + 14 - 28 * pct / 100}" width="22" height="${28 * pct / 100}" fill="var(--water)" opacity=".55"/><text x="${cx + 18}" y="${cy + 4}" font-size="12" fill="var(--ink2)">${esc(tlx(tk.name))} · ${Math.round(pct)}%</text></g>`; }
-  for (const p of ps) { const [x, y] = P(p.lat, p.lng), st = statusM(p); g += `<g class="mk" data-mk="${p.id}" tabindex="0" role="button" aria-label="${esc(p.short)}: ${esc(tlx(ST_TXT[st.c]))}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="17" fill="var(--${st.c})" opacity=".18"/><circle cx="${x}" cy="${y}" r="10" fill="var(--${st.c})" stroke="var(--card)" stroke-width="3"/><text x="${x}" y="${y + 30}" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">${esc(p.short)}</text></g>`; }
-  const barKm = pxKm * 1 > 200 ? 0.25 : pxKm * 0.5 > 60 ? 0.5 : 1; g += `<g transform="translate(20 ${Hm - 22})"><rect width="${pxKm * barKm}" height="5" fill="var(--ink2)"/><text y="-6" font-size="12" fill="var(--ink2)">${barKm * 1000} m</text></g><g transform="translate(${W - 34} 34)"><path d="M0 -16 L7 6 L0 1 L-7 6Z" fill="var(--ink2)"/><text y="22" text-anchor="middle" font-size="12" fill="var(--ink2)">${tl("N")}</text></g>`;
+  if (!simple) for (const [tid, l] of Object.entries(tks)) { const cx = l.reduce((a, b) => a + b[0], 0) / l.length + 30, cy = l.reduce((a, b) => a + b[1], 0) / l.length - 34; for (const q of l) g += `<line x1="${q[0]}" y1="${q[1]}" x2="${cx}" y2="${cy}" stroke="var(--water)" stroke-width="2" stroke-opacity=".5"/>`; const tk = byId(S.tanks, tid), pct = SIM[S.pumps.find(p => p.tank === tid).id].tankPct || 0; g += `<g><rect x="${cx - 13}" y="${cy - 16}" width="26" height="32" rx="3" fill="var(--card)" stroke="var(--water)" stroke-width="1.5"/><rect x="${cx - 11}" y="${cy + 14 - 28 * pct / 100}" width="22" height="${28 * pct / 100}" fill="var(--water)" opacity=".55"/><text x="${cx + 18}" y="${cy + 4}" font-size="12" fill="var(--ink2)">${esc(tlx(tk.name))} · ${Math.round(pct)}%</text></g>`; }
+  for (const p of ps) { const [x, y] = P(p.lat, p.lng), st = statusM(p); g += `<g class="mk" data-mk="${p.id}" tabindex="0" role="button" aria-label="${esc(p.short)}: ${esc(tlx(ST_TXT[st.c]))}" style="cursor:pointer">${simple ? `<circle cx="${x}" cy="${y}" r="52" fill="transparent"/>` : ""}<circle cx="${x}" cy="${y}" r="${simple ? 24 : 17}" fill="var(--${st.c})" opacity=".18"/><circle cx="${x}" cy="${y}" r="${simple ? 14 : 10}" fill="var(--${st.c})" stroke="var(--card)" stroke-width="3"/><text x="${x}" y="${y + (simple ? 42 : 30)}" text-anchor="middle" font-size="${simple ? 17 : 13}" font-weight="600" fill="var(--ink)">${esc(p.short)}</text></g>`; }
+  if (!simple) { const barKm = pxKm * 1 > 200 ? 0.25 : pxKm * 0.5 > 60 ? 0.5 : 1; g += `<g transform="translate(20 ${Hm - 22})"><rect width="${pxKm * barKm}" height="5" fill="var(--ink2)"/><text y="-6" font-size="12" fill="var(--ink2)">${barKm * 1000} m</text></g><g transform="translate(${W - 34} 34)"><path d="M0 -16 L7 6 L0 1 L-7 6Z" fill="var(--ink2)"/><text y="22" text-anchor="middle" font-size="12" fill="var(--ink2)">${tl("N")}</text></g>`; }
+  return { g, W, Hm };
+}
+export function bindMap() {
+  const open = (id, el) => { const p = pump(id), st = statusM(p), m = last(p.id)?.m || {}, h = healthM(p), box = $("#map").getBoundingClientRect(), r = el.getBoundingClientRect(); const pop = $("#mpop"); pop.className = "mpop"; pop.style.left = clamp(r.left - box.left - 130, 6, box.width - 290) + "px"; pop.style.top = (r.bottom - box.top + 8) + "px";
+    pop.innerHTML = `<div class="row" style="justify-content:space-between"><b>${esc(p.short)}</b>${stCell(st)}</div><p class="small muted" style="margin:4px 0 8px">${esc(tlx(st.detail))}</p><dl class="kv small"><dt>${tl("Flow")}</dt><dd>${has(p, "flow_lpm") ? fmtN(m.flow_lpm, 1) + " L/min" : "—"}</dd><dt>${tl("Water today")}</dt><dd>${fmtN(today(p).water, 1)} m³</dd><dt>${tl("Health")}</dt><dd>${h.score}/100${h.reasons[0] ? " — " + esc(tlx(h.reasons[0].txt)) : ""}</dd></dl><div class="row" style="margin-top:10px"><button class="btn sm pri" data-go="#/pump/${p.id}">${tl("Open pump")}</button><button class="btn sm" data-mclose>${tl("Close")}</button></div>`;
+    pop.querySelector("[data-go]").onclick = e => go(e.currentTarget.dataset.go);
+    pop.querySelector("[data-mclose]").onclick = () => { pop.className = ""; pop.innerHTML = ""; }; };
+  document.querySelectorAll("[data-mk]").forEach(m => { m.onclick = () => open(m.dataset.mk, m); m.onkeydown = e => { if (e.key === "Enter") open(m.dataset.mk, m); }; });
+}
+ROUTES.map = () => {
+  const ps = myPumps(); if (!ps.length) { setView(`<div class="panel"><div class="bd">${tl("No assets you can see yet.")}</div></div>`); return { title: tl("Map") }; }
+  const { g, W, Hm } = mapSvg(ps, false);
   setView(`<section class="panel"><div class="hd"><h2>${tl("Fleet map")}</h2><span class="na">${tl("Schematic site plan from asset coordinates. Satellite basemap tiles plug in here when the map provider is configured.")}</span><span class="sp"></span><span class="legend"><span><span class="dot" style="background:var(--ok)"></span> ${tl("healthy")}</span><span><span class="dot" style="background:var(--warn)"></span> ${tl("warning")}</span><span><span class="dot" style="background:var(--crit)"></span> ${tl("critical")}</span><span><span class="dot" style="background:var(--off)"></span> ${tl("offline")}</span></span></div>
   <div class="map" id="map"><svg viewBox="0 0 ${W} ${Hm}" role="img" aria-label="${esc(tl("Map of pumps"))}">${g}</svg><div id="mpop"></div></div></section>`);
   return {
-    title: tl("Map"), after() {
-      const open = (id, el) => { const p = pump(id), st = statusM(p), m = last(p.id)?.m || {}, h = healthM(p), box = $("#map").getBoundingClientRect(), r = el.getBoundingClientRect(); const pop = $("#mpop"); pop.className = "mpop"; pop.style.left = clamp(r.left - box.left - 130, 6, box.width - 290) + "px"; pop.style.top = (r.bottom - box.top + 8) + "px";
-        pop.innerHTML = `<div class="row" style="justify-content:space-between"><b>${esc(p.short)}</b>${stCell(st)}</div><p class="small muted" style="margin:4px 0 8px">${esc(tlx(st.detail))}</p><dl class="kv small"><dt>${tl("Flow")}</dt><dd>${has(p, "flow_lpm") ? fmtN(m.flow_lpm, 1) + " L/min" : "—"}</dd><dt>${tl("Water today")}</dt><dd>${fmtN(today(p).water, 1)} m³</dd><dt>${tl("Health")}</dt><dd>${h.score}/100${h.reasons[0] ? " — " + esc(tlx(h.reasons[0].txt)) : ""}</dd></dl><div class="row" style="margin-top:10px"><button class="btn sm pri" data-go="#/pump/${p.id}">${tl("Open pump")}</button><button class="btn sm" data-mclose>${tl("Close")}</button></div>`;
-        pop.querySelector("[data-go]").onclick = e => go(e.currentTarget.dataset.go);
-        pop.querySelector("[data-mclose]").onclick = () => { pop.className = ""; pop.innerHTML = ""; }; };
-      document.querySelectorAll("[data-mk]").forEach(m => { m.onclick = () => open(m.dataset.mk, m); m.onkeydown = e => { if (e.key === "Enter") open(m.dataset.mk, m); }; });
-    }, live: false,
+    title: tl("Map"), after: bindMap, live: false,
   };
 };
