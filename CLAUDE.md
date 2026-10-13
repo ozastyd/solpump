@@ -31,6 +31,10 @@ There is no single-test command; smoke steps live in `tools/smoke-steps.js`.
 - Missing metrics render "no sensor" (`nos()`), never 0. Escape all interpolated HTML with `esc()`. Charts are hand-rolled SVG. Style tokens live in `src/style.css` `:root` (light + dark).
 - Dense single-line style with short names is intentional; match the file you edit.
 
+## i18n
+
+English + Indonesian. User-visible text goes through `tl("English {x}", {x})` (plain literal only), string constants are marked `tlk()` and shown via `tlx()`; stored strings (alarms, audit, tasks) are translated at display with `tlx()`. Dictionaries live in `src/id-*.js`; `npm run verify` fails on missing entries. Details in `AGENTS.md`.
+
 ## Deploy
 
 `npm run check` -> commit -> `git push`; Vercel builds `main` (`vercel.json`: `npm run verify && npm run build`) to https://solpump-gamma.vercel.app. Never commit `dist/`, `node_modules/`, `.vercel/`.

@@ -7,7 +7,7 @@ import globals from 'globals';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
-const FILES = ['core.js', 'intel.js', 'ui1.js', 'ui2.js', 'ui3.js', 'ui4.js', 'main.js'];
+const FILES = ['id-core.js', 'id-intel.js', 'id-ui1.js', 'id-ui2.js', 'id-ui3.js', 'id-ui4.js', 'i18n.js', 'core.js', 'intel.js', 'ui1.js', 'ui2.js', 'ui3.js', 'ui4.js', 'main.js'];
 let fail = 0;
 
 // ---------- 1. no-undef as ES modules (catches any name that should have been imported) ----------

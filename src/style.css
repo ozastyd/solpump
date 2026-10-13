@@ -60,6 +60,8 @@ a{color:var(--water)}
 .clock .demo{background:var(--sun);color:#3A3100;border-radius:999px;padding:1px 9px;font:600 12px var(--sans);white-space:nowrap}
 .clock button{border:0;background:transparent;border-radius:999px;padding:2px 7px;cursor:pointer;color:var(--ink2);white-space:nowrap}
 .clock button.on{background:var(--card);box-shadow:0 0 0 1px var(--line);color:var(--ink)}
+.seg.lang button{padding:3px 9px;font:600 12px var(--num);letter-spacing:.04em}
+.login-lang{display:flex;justify-content:flex-end}
 .who{display:flex;align-items:center;gap:8px;font-size:13px}
 .who select{border:1px solid var(--line);background:var(--card);border-radius:var(--r2);padding:4px 6px}
 .menu-btn{display:none;border:1px solid var(--line);background:var(--card);border-radius:var(--r2);padding:4px 9px;cursor:pointer}
@@ -134,6 +136,7 @@ td.r,th.r{text-align:right}
 td .num{font-size:15px}
 .na{color:var(--ink3);font-size:12.5px}
 .fleet td.r,.fleet td b{white-space:nowrap}
+@media (max-width:1500px){.fleet th,.fleet td{padding-left:6px;padding-right:6px}.fleet th{white-space:normal;vertical-align:bottom}}
 @media (max-width:900px){.fleet .opt{display:none}}
 
 /* status */
@@ -277,6 +280,7 @@ details pre,.code{background:var(--paper);border:1px solid var(--line2);border-r
   .clock #clk{flex:1 1 100%}
   .clock button{min-height:32px;min-width:36px;padding:2px 9px}
   .seg button{padding:8px 12px}
+  .seg.lang button{padding:8px 11px}
   .attn .m .pill{font-size:12px}
   .tabs button{padding:9px 9px;font-size:14px}
   .stk .btn.sm,.panel>.hd .btn.sm{min-height:44px;padding:6px 14px}

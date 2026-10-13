@@ -10,14 +10,14 @@ command -v "$PYPATH" >/dev/null 2>&1 || { echo "error: python not found on PATH"
 "$PYPATH" - <<'PY'
 import base64, re
 ENC = "utf-8"  # sources are UTF-8; locale encoding (cp1252) crashes on src/ui1.js
-IMPORT = re.compile(r"import \{[^}]*\} from '\./[a-z0-9]+\.js';")
+IMPORT = re.compile(r"import \{[^}]*\} from '\./[a-z0-9-]+\.js';")
 def classic(f):
     s = open('src/' + f, encoding=ENC).read()
     lines = [l for l in s.split('\n') if not IMPORT.fullmatch(l)]
     return '\n'.join(re.sub(r'^export ', '', l).replace('; export ', '; ') for l in lines)
 logo=base64.b64encode(open('assets/logo.png','rb').read()).decode()
 css=open('src/style.css', encoding=ENC).read()
-js="\n".join(classic(f) for f in ['core.js','intel.js','ui1.js','ui2.js','ui3.js','ui4.js'])
+js="\n".join(classic(f) for f in ['id-core.js','id-intel.js','id-ui1.js','id-ui2.js','id-ui3.js','id-ui4.js','i18n.js','core.js','intel.js','ui1.js','ui2.js','ui3.js','ui4.js'])
 html=f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

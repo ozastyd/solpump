@@ -1,4 +1,5 @@
 import logo from '../assets/logo.png';
+import './i18n.js';
 import './core.js';
 import './intel.js';
 import './ui1.js';

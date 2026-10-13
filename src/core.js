@@ -5,6 +5,7 @@
    Everything here runs in the browser in DEMO MODE. In production
    each section maps to a separate service (see Blueprint page).
    ============================================================ */
+import { I18N, tl, tlk, tlx } from './i18n.js';
 export const MIN = 6e4, H = 36e5, D = 864e5, TZ = 7 * H; // WIB (UTC+7)
 export const lh = t => ((((t + TZ) % D) + D) % D) / H;
 export const dk = t => Math.floor((t + TZ) / D);
@@ -33,10 +34,10 @@ export const SIM = {};         // physical simulator state per pump (stands in f
 
 /* ---------- tenants, users, roles ---------- */
 export const ROLES = {
-  owner: { label: "Owner / Administrator", can: ["view", "command", "ack", "configure", "maintain", "users", "reports", "audit"] },
-  ops: { label: "Operations Manager", can: ["view", "command", "ack", "configure", "maintain", "reports", "audit"] },
-  tech: { label: "Field Technician", can: ["view", "ack", "maintain"] },
-  viewer: { label: "Viewer", can: ["view"] },
+  owner: { label: tlk("Owner / Administrator"), can: ["view", "command", "ack", "configure", "maintain", "users", "reports", "audit"] },
+  ops: { label: tlk("Operations Manager"), can: ["view", "command", "ack", "configure", "maintain", "reports", "audit"] },
+  tech: { label: tlk("Field Technician"), can: ["view", "ack", "maintain"] },
+  viewer: { label: tlk("Viewer"), can: ["view"] },
 };
 export const can = a => !!S.session && ROLES[S.session.role].can.includes(a);
 
@@ -65,7 +66,7 @@ export function seedEntities() {
     const id = o.id, n = o.n;
     S.wells.push({ id: "W-" + n, org: o.org, site: o.site, name: "Well #" + n, depth: o.wd, pumpDepth: o.pd, static: o.st, expDyn: r1(o.st + o.dd * o.Q * 0.85), minSafe: o.ms, drilled: o.drilled || "2021-08-14" });
     S.arrays.push({ id: "PV-" + n, org: o.org, site: o.site, kw: o.kw, panels: Math.round(o.kw * 1000 / 550), panelSpec: "550 Wp mono PERC, Voc 49.6 V", tilt: 10, azimuth: 0 });
-    S.controllers.push({ id: "CTL-" + n, org: o.org, model: o.ctl, mppt: "Integrated MPPT, 150–430 VDC", fw: o.cfw || "3.4.1" });
+    S.controllers.push({ id: "CTL-" + n, org: o.org, model: o.ctl, mppt: tlk("Integrated MPPT, 150–430 VDC"), fw: o.cfw || "3.4.1" });
     S.devices.push({ id: "DEV-" + n, org: o.org, site: o.site, asset: id, hw: o.hw, adapter: o.ad, net: o.net, sim: o.net.includes("LTE") ? "Telkomsel IoT, ICCID •••• " + (4410 + +n) : "—", fw: o.fw || "1.8.2", secretHash: "", fp: "", rotatedAt: null, rssi: o.rssi ?? -84, battery: 12.9, uptimeH: 0, lastHeartbeat: 0, lastUpload: 0, sent: 0, lost: 0, buffered: 0, online: true });
     S.pipelines.push({ id: "PL-" + n, org: o.org, site: o.site, from: "W-" + n, to: o.tank, dia: o.pipe || 50, len: o.len || 240 });
     S.pumps.push({
@@ -78,13 +79,13 @@ export function seedEntities() {
   };
   const all = ["pv_voltage", "pv_current", "pv_power", "pump_voltage", "pump_current", "pump_power", "flow_lpm", "pressure_bar", "well_level_m", "tank_level_pct", "motor_temp_c", "ctrl_temp_c", "irradiance_wm2", "rpm"];
   const without = (...k) => all.filter(x => !k.includes(x));
-  P({ id: "PUMP-01", n: "01", org: "ORG-ASL", site: "S-A", tank: "TK-A1", lat: -7.5543, lng: 110.7628, elev: 113, wd: 90, pd: 62, st: 18.2, ms: 50, dd: 0.17, tau: 38, kw: 3.3, P: 2200, Q: 95, Hd: 75, V: 310, rpm: 3000, type: "Submersible centrifugal (multistage)", ctl: "Lorentz PSk3-5", mfr: "Lorentz", model: "PS2-4000 C-SJ8-15", sn: "LZ-2204-88123", inst: "2022-03-10", war: "2027-03-10", ml: -41, hw: "ESP32-S3 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", rssi: -104, sensors: without("motor_temp_c"), scen: "normal" });
-  P({ id: "PUMP-02", n: "02", org: "ORG-ASL", site: "S-A", tank: "TK-A1", lat: -7.5566, lng: 110.7661, elev: 111, wd: 70, pd: 48, st: 15.6, ms: 40, dd: 0.16, tau: 35, kw: 2.4, P: 1500, Q: 70, Hd: 65, V: 300, rpm: 2900, type: "Submersible centrifugal (multistage)", ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-55410", inst: "2022-03-12", war: "2026-03-12", ml: -60, hw: "Siemens S7-1200 PLC via Modbus gateway", ad: "modbus-rtu", net: "4G/LTE (HTTP)", sensors: all, scen: "lowflow" });
-  P({ id: "PUMP-03", n: "03", org: "ORG-ASL", site: "S-A", tank: "TK-A2", lat: -7.5528, lng: 110.7671, elev: 115, wd: 48, pd: 40, st: 22.0, ms: 39.5, dd: 0.37, tau: 55, kw: 1.8, P: 1100, Q: 55, Hd: 55, V: 220, rpm: 2850, type: "Helical rotor (positive displacement)", ctl: "Lorentz PSk3-3", mfr: "Lorentz", model: "PS2-1800 HR-14", sn: "LZ-1803-77302", inst: "2023-07-01", war: "2028-07-01", ml: -102, mi: 90, hw: "ESP32 + RS485", ad: "mqtt-json", net: "Wi-Fi (MQTT)", rssi: -71, sensors: all, scen: "dryrun" });
-  P({ id: "PUMP-04", n: "04", org: "ORG-ASL", site: "S-B", tank: "TK-B1", lat: -7.5701, lng: 110.7796, elev: 103, wd: 100, pd: 70, st: 20.4, ms: 60, dd: 0.13, tau: 40, kw: 4.5, P: 3000, Q: 120, Hd: 80, V: 380, rpm: 2900, type: "Submersible centrifugal (multistage)", ctl: "Franklin SubDrive Solar", mfr: "Franklin Electric", model: "SolarPAK 4400", sn: "FE-SP4-20391", inst: "2024-01-20", war: "2029-01-20", ml: -35, hw: "LoRaWAN node (RS485)", ad: "lorawan", net: "LoRaWAN → gateway (4G)", rssi: -112, sensors: without("well_level_m", "rpm"), scen: "lowsolar_hot" });
-  P({ id: "PUMP-05", n: "05", org: "ORG-ASL", site: "S-B", tank: "TK-B1", lat: -7.5730, lng: 110.7840, elev: 105, wd: 95, pd: 66, st: 23.0, ms: 56, dd: 0.15, tau: 50, kw: 3.3, P: 2200, Q: 90, Hd: 75, V: 310, rpm: 3000, type: "Submersible centrifugal (multistage)", ctl: "Lorentz PSk3-5", mfr: "Lorentz", model: "PS2-4000 C-SJ8-15", sn: "LZ-2204-90551", inst: "2024-01-22", war: "2029-01-22", ml: -70, mi: 90, hw: "ESP32-S3 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", rssi: -95, sensors: without("pressure_bar"), scen: "offline_declining" });
-  P({ id: "PUMP-T1", n: "T1", org: "ORG-TM", site: "S-T", tank: "TK-T1", lat: -7.6412, lng: 110.8195, elev: 132, wd: 80, pd: 55, st: 19.5, ms: 46, dd: 0.17, tau: 40, kw: 2.4, P: 1500, Q: 70, Hd: 60, V: 300, rpm: 2900, type: "Submersible centrifugal (multistage)", ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-61002", inst: "2025-05-02", war: "2030-05-02", ml: -20, hw: "ESP32 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", sensors: without("irradiance_wm2", "motor_temp_c", "pressure_bar"), scen: "normal" });
-  P({ id: "PUMP-T2", n: "T2", org: "ORG-TM", site: "S-T", tank: "TK-T1", lat: -7.6431, lng: 110.8226, elev: 130, wd: 75, pd: 52, st: 21.0, ms: 44, dd: 0.18, tau: 42, kw: 2.4, P: 1500, Q: 70, Hd: 60, V: 300, rpm: 2900, type: "Submersible centrifugal (multistage)", ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-61003", inst: "2025-05-02", war: "2030-05-02", ml: -20, hw: "ESP32 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", sensors: without("irradiance_wm2", "motor_temp_c", "pressure_bar", "well_level_m"), scen: "normal" });
+  P({ id: "PUMP-01", n: "01", org: "ORG-ASL", site: "S-A", tank: "TK-A1", lat: -7.5543, lng: 110.7628, elev: 113, wd: 90, pd: 62, st: 18.2, ms: 50, dd: 0.17, tau: 38, kw: 3.3, P: 2200, Q: 95, Hd: 75, V: 310, rpm: 3000, type: tlk("Submersible centrifugal (multistage)"), ctl: "Lorentz PSk3-5", mfr: "Lorentz", model: "PS2-4000 C-SJ8-15", sn: "LZ-2204-88123", inst: "2022-03-10", war: "2027-03-10", ml: -41, hw: "ESP32-S3 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", rssi: -104, sensors: without("motor_temp_c"), scen: "normal" });
+  P({ id: "PUMP-02", n: "02", org: "ORG-ASL", site: "S-A", tank: "TK-A1", lat: -7.5566, lng: 110.7661, elev: 111, wd: 70, pd: 48, st: 15.6, ms: 40, dd: 0.16, tau: 35, kw: 2.4, P: 1500, Q: 70, Hd: 65, V: 300, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-55410", inst: "2022-03-12", war: "2026-03-12", ml: -60, hw: tlk("Siemens S7-1200 PLC via Modbus gateway"), ad: "modbus-rtu", net: "4G/LTE (HTTP)", sensors: all, scen: "lowflow" });
+  P({ id: "PUMP-03", n: "03", org: "ORG-ASL", site: "S-A", tank: "TK-A2", lat: -7.5528, lng: 110.7671, elev: 115, wd: 48, pd: 40, st: 22.0, ms: 39.5, dd: 0.37, tau: 55, kw: 1.8, P: 1100, Q: 55, Hd: 55, V: 220, rpm: 2850, type: tlk("Helical rotor (positive displacement)"), ctl: "Lorentz PSk3-3", mfr: "Lorentz", model: "PS2-1800 HR-14", sn: "LZ-1803-77302", inst: "2023-07-01", war: "2028-07-01", ml: -102, mi: 90, hw: "ESP32 + RS485", ad: "mqtt-json", net: "Wi-Fi (MQTT)", rssi: -71, sensors: all, scen: "dryrun" });
+  P({ id: "PUMP-04", n: "04", org: "ORG-ASL", site: "S-B", tank: "TK-B1", lat: -7.5701, lng: 110.7796, elev: 103, wd: 100, pd: 70, st: 20.4, ms: 60, dd: 0.13, tau: 40, kw: 4.5, P: 3000, Q: 120, Hd: 80, V: 380, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Franklin SubDrive Solar", mfr: "Franklin Electric", model: "SolarPAK 4400", sn: "FE-SP4-20391", inst: "2024-01-20", war: "2029-01-20", ml: -35, hw: tlk("LoRaWAN node (RS485)"), ad: "lorawan", net: "LoRaWAN → gateway (4G)", rssi: -112, sensors: without("well_level_m", "rpm"), scen: "lowsolar_hot" });
+  P({ id: "PUMP-05", n: "05", org: "ORG-ASL", site: "S-B", tank: "TK-B1", lat: -7.5730, lng: 110.7840, elev: 105, wd: 95, pd: 66, st: 23.0, ms: 56, dd: 0.15, tau: 50, kw: 3.3, P: 2200, Q: 90, Hd: 75, V: 310, rpm: 3000, type: tlk("Submersible centrifugal (multistage)"), ctl: "Lorentz PSk3-5", mfr: "Lorentz", model: "PS2-4000 C-SJ8-15", sn: "LZ-2204-90551", inst: "2024-01-22", war: "2029-01-22", ml: -70, mi: 90, hw: "ESP32-S3 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", rssi: -95, sensors: without("pressure_bar"), scen: "offline_declining" });
+  P({ id: "PUMP-T1", n: "T1", org: "ORG-TM", site: "S-T", tank: "TK-T1", lat: -7.6412, lng: 110.8195, elev: 132, wd: 80, pd: 55, st: 19.5, ms: 46, dd: 0.17, tau: 40, kw: 2.4, P: 1500, Q: 70, Hd: 60, V: 300, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-61002", inst: "2025-05-02", war: "2030-05-02", ml: -20, hw: "ESP32 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", sensors: without("irradiance_wm2", "motor_temp_c", "pressure_bar"), scen: "normal" });
+  P({ id: "PUMP-T2", n: "T2", org: "ORG-TM", site: "S-T", tank: "TK-T1", lat: -7.6431, lng: 110.8226, elev: 130, wd: 75, pd: 52, st: 21.0, ms: 44, dd: 0.18, tau: 42, kw: 2.4, P: 1500, Q: 70, Hd: 60, V: 300, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-61003", inst: "2025-05-02", war: "2030-05-02", ml: -20, hw: "ESP32 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", sensors: without("irradiance_wm2", "motor_temp_c", "pressure_bar", "well_level_m"), scen: "normal" });
 
   for (const p of S.pumps) {
     p.maint.last = START + p.maint.last * D;
@@ -93,16 +94,16 @@ export function seedEntities() {
     d.secretHash = fnv(sec); d.fp = d.secretHash.slice(0, 4) + "…" + d.secretHash.slice(-4); SIM[p.id].secret = sec;
     TS[p.id] = [];
   }
-  const sch = (pump, w) => S.schedules.push({ id: uid("SCH"), org: org(pump).id, pump, windows: w, respect: ["Well protection", "Tank level", "Solar availability", "Fault state", "Manual override"] });
+  const sch = (pump, w) => S.schedules.push({ id: uid("SCH"), org: org(pump).id, pump, windows: w, respect: [tlk("Well protection"), tlk("Tank level"), tlk("Solar availability"), tlk("Fault state"), tlk("Manual override")] });
   sch("PUMP-01", [["06:00", "17:30"]]); sch("PUMP-02", [["06:00", "17:30"]]); sch("PUMP-03", [["06:30", "17:00"]]);
   sch("PUMP-04", [["06:00", "17:30"]]); sch("PUMP-05", [["06:00", "17:30"]]); sch("PUMP-T1", [["06:30", "16:30"]]); sch("PUMP-T2", [["06:30", "16:30"]]);
-  const A = (o) => S.automations.push(Object.assign({ id: uid("AUT"), enabled: true, fired: 0, createdBy: "System template" }, o));
+  const A = (o) => S.automations.push(Object.assign({ id: uid("AUT"), enabled: true, fired: 0, createdBy: tlk("System template") }, o));
   for (const og of ["ORG-ASL", "ORG-TM"]) {
-    A({ org: og, name: "Stop when the tank is nearly full", when: [{ m: "tank_level_pct", op: ">", v: 90 }], then: "stop", release: { m: "tank_level_pct", op: "<", v: 80 }, scope: "all" });
-    A({ org: og, name: "Start when the tank is low and the sun is strong", when: [{ m: "tank_level_pct", op: "<", v: 30 }, { m: "pv_power", op: ">", v: 1500 }], then: "start", scope: "all" });
-    A({ org: og, name: "Protect the well: stop below minimum safe level", when: [{ m: "well_margin_m", op: "<", v: 0 }], then: "stop", release: { m: "well_margin_m", op: ">", v: 3 }, scope: "all" });
-    A({ org: og, name: "Stop on sustained low flow and raise a critical alert", when: [{ m: "flow_lpm", op: "<", v: 10, for: 5 }, { m: "pump_power_pct", op: ">", v: 50 }], then: "stop_alert", releaseAfter: 30, scope: "all" });
-    A({ org: og, name: "Notify the operations manager on any pump fault", when: [{ m: "fault", op: "=", v: "any" }], then: "notify_ops", scope: "all" });
+    A({ org: og, name: tlk("Stop when the tank is nearly full"), when: [{ m: "tank_level_pct", op: ">", v: 90 }], then: "stop", release: { m: "tank_level_pct", op: "<", v: 80 }, scope: "all" });
+    A({ org: og, name: tlk("Start when the tank is low and the sun is strong"), when: [{ m: "tank_level_pct", op: "<", v: 30 }, { m: "pv_power", op: ">", v: 1500 }], then: "start", scope: "all" });
+    A({ org: og, name: tlk("Protect the well: stop below minimum safe level"), when: [{ m: "well_margin_m", op: "<", v: 0 }], then: "stop", release: { m: "well_margin_m", op: ">", v: 3 }, scope: "all" });
+    A({ org: og, name: tlk("Stop on sustained low flow and raise a critical alert"), when: [{ m: "flow_lpm", op: "<", v: 10, for: 5 }, { m: "pump_power_pct", op: ">", v: 50 }], then: "stop_alert", releaseAfter: 30, scope: "all" });
+    A({ org: og, name: tlk("Notify the operations manager on any pump fault"), when: [{ m: "fault", op: "=", v: "any" }], then: "notify_ops", scope: "all" });
   }
 }
 export const byId = (arr, id) => arr.find(x => x.id === id);
@@ -223,8 +224,8 @@ export function stepPump(p, t, dt) {
   return { m, state, fault: s.fault, tankId: tk.id };
 }
 export const FAULTS = {
-  "E-DRY": { name: "Dry-run protection", stopTxt: "Controller stopped the pump: dry-run protection (no water at the intake).", plain: "Pump stopped itself because it was running without enough water." },
-  "E-OT": { name: "Controller over-temperature", stopTxt: "Controller stopped the pump: over-temperature.", plain: "Pump controller overheated and shut down to protect itself." },
+  "E-DRY": { name: tlk("Dry-run protection"), stopTxt: tlk("Controller stopped the pump: dry-run protection (no water at the intake)."), plain: tlk("Pump stopped itself because it was running without enough water.") },
+  "E-OT": { name: tlk("Controller over-temperature"), stopTxt: tlk("Controller stopped the pump: over-temperature."), plain: tlk("Pump controller overheated and shut down to protect itself.") },
 };
 
 /* ---------- device firmware simulator: encodes per its adapter, buffers when offline ---------- */
@@ -241,17 +242,17 @@ export function encode(p, t, m, state, fault, seq) {
 /* ---------- INGESTION LAYER: adapters normalise vendor payloads to one schema ---------- */
 export const ADAPTERS = {
   "mqtt-json": { label: "MQTT · JSON (ESP32)", decode(raw) { const b = raw.body, metrics = {}; const inv = Object.fromEntries(Object.entries(SHORT).map(([a, c]) => [c, a])); for (const k in b.v) metrics[inv[k]] = b.v[k]; return { device_id: b.d, seq: b.seq, timestamp: b.ts * 1000, metrics, pump_state: b.st, fault_code: b.fc }; } },
-  "modbus-rtu": { label: "Modbus RTU register map via HTTP gateway (PLC)", decode(raw) { const metrics = {}; raw.holding_40001.forEach((v, i) => { if (v !== 0xFFFF) { const k = REG[i]; metrics[k] = v / (k.includes("current") || k.includes("pressure") ? 100 : 10); } }); return { device_id: raw.device, seq: raw.seq, timestamp: Date.parse(raw.time), metrics, pump_state: ["stopped", "running", "", "", "faulted"][raw.status_word], fault_code: raw.alarm_code === 21 ? "E-DRY" : raw.alarm_code === 33 ? "E-OT" : null }; } },
-  "lorawan": { label: "LoRaWAN uplink (fPort 2, packed uint16)", decode(raw) { const metrics = {}; REG.forEach((k, i) => { const v = raw.payload[2 * i] << 8 | raw.payload[2 * i + 1]; if (v !== 0xFFFF) metrics[k] = v / (k.includes("current") || k.includes("pressure") ? 100 : 10); }); return { device_id: raw.dev_eui, seq: raw.fCnt, timestamp: raw.received, metrics, pump_state: raw.flags & 2 ? "faulted" : raw.flags & 1 ? "running" : "stopped", fault_code: raw.flags & 4 ? "E-DRY" : raw.flags & 8 ? "E-OT" : null }; } },
+  "modbus-rtu": { label: tlk("Modbus RTU register map via HTTP gateway (PLC)"), decode(raw) { const metrics = {}; raw.holding_40001.forEach((v, i) => { if (v !== 0xFFFF) { const k = REG[i]; metrics[k] = v / (k.includes("current") || k.includes("pressure") ? 100 : 10); } }); return { device_id: raw.device, seq: raw.seq, timestamp: Date.parse(raw.time), metrics, pump_state: ["stopped", "running", "", "", "faulted"][raw.status_word], fault_code: raw.alarm_code === 21 ? "E-DRY" : raw.alarm_code === 33 ? "E-OT" : null }; } },
+  "lorawan": { label: tlk("LoRaWAN uplink (fPort 2, packed uint16)"), decode(raw) { const metrics = {}; REG.forEach((k, i) => { const v = raw.payload[2 * i] << 8 | raw.payload[2 * i + 1]; if (v !== 0xFFFF) metrics[k] = v / (k.includes("current") || k.includes("pressure") ? 100 : 10); }); return { device_id: raw.dev_eui, seq: raw.fCnt, timestamp: raw.received, metrics, pump_state: raw.flags & 2 ? "faulted" : raw.flags & 1 ? "running" : "stopped", fault_code: raw.flags & 4 ? "E-DRY" : raw.flags & 8 ? "E-OT" : null }; } },
 };
 export const RANGES = { pv_voltage: [0, 900], pv_current: [0, 40], pv_power: [0, 20000], pump_power: [0, 20000], flow_lpm: [0, 2000], pressure_bar: [0, 40], well_level_m: [0, 400], tank_level_pct: [0, 100], motor_temp_c: [-10, 150], ctrl_temp_c: [-10, 150], irradiance_wm2: [0, 1500] };
 export function ingest(adapterKey, raw, credential, src = "live") {
   const ev = ADAPTERS[adapterKey].decode(raw);
   const d = byId(S.devices, ev.device_id);
-  if (!d) return log({ ok: false, err: "unknown device" });
+  if (!d) return log({ ok: false, err: tlk("unknown device") });
   // per-device credential check (hash compare; secrets never stored or sent to the UI in clear)
   const okCred = fnv(credential) === d.secretHash || (d.prevHash && fnv(credential) === d.prevHash && S.now < d.prevUntil);
-  if (!okCred) return log({ ok: false, device: d.id, err: "credential rejected (401)" });
+  if (!okCred) return log({ ok: false, device: d.id, err: tlk("credential rejected (401)") });
   const key = d.id + ":" + ev.seq;
   if (SEEN.has(key)) { if (src !== "seed") log({ ok: true, dup: true, device: d.id, seq: ev.seq, src }); return { accepted: false, duplicate: true }; }
   SEEN.add(key);
@@ -357,7 +358,7 @@ export function runAutomation(p) {
       if (hit && !active) {
         s.inhibit[key] = { name: r.name, kind: r.when.some(c => c.m === "well_margin_m") ? "well" : "other", since: S.now }; r.fired++;
         audit("automation", "Automation stopped pump", p.id, null, r.name);
-        if (r.then === "stop_alert") raise(p, { id: "auto_lowflow", sev: "critical", title: "Pump stopped: sustained low flow", msg: `${p.short} was stopped by automation after flow stayed below ${r.when[0].v} L/min for ${r.when[0].for} minutes at high power.` }, d);
+        if (r.then === "stop_alert") raise(p, { id: "auto_lowflow", sev: "critical", title: tlk("Pump stopped: sustained low flow"), msg: `${p.short} was stopped by automation after flow stayed below ${r.when[0].v} L/min for ${r.when[0].for} minutes at high power.` }, d);
       } else if (active) {
         const rel = r.release ? condTrue(p, r.release, d) : r.releaseAfter ? S.now - active.since >= r.releaseAfter * MIN : !hit;
         if (rel) { delete s.inhibit[key]; audit("automation", "Automation released hold", p.id, null, r.name); }
@@ -372,30 +373,30 @@ export function runAutomation(p) {
 
 /* ---------- ALERT ENGINE: threshold + duration + hysteresis + cooldown + escalation ---------- */
 export const RULES = [
-  { id: "dry_run", sev: "critical", title: "Possible dry-run", cond: c => c.d.fault === "E-DRY" || (c.running && c.p.sensors.includes("well_level_m") && c.d.well_level_m > well(c.p).pumpDepth - 1.2 && c.d.flow_lpm < c.p.Q * 0.3), clear: c => c.d.fault !== "E-DRY" && !c.running || (c.d.flow_lpm > c.p.Q * 0.4), dur: 0 },
-  { id: "pump_fault", sev: "critical", title: "Pump controller fault", cond: c => c.d.fault === "E-OT", clear: c => !c.d.fault, dur: 0 },
-  { id: "no_flow", sev: "critical", title: "No flow while running", cond: c => c.running && c.d.flow_lpm < S.thresholds.noFlowLpm && c.d.pump_power_pct > 40, clear: c => !c.running || c.d.flow_lpm > S.thresholds.noFlowLpm * 3, dur: 5 },
-  { id: "low_flow", sev: "warning", title: "Water production below expected", cond: c => c.exp && c.d.flow_lpm < c.exp * S.thresholds.lowFlowPct / 100, clear: c => !c.running || (c.exp && c.d.flow_lpm > c.exp * S.thresholds.lowFlowClearPct / 100), dur: () => S.thresholds.lowFlowMin },
-  { id: "low_well", sev: "warning", title: "Well level close to minimum safe level", cond: c => c.d.well_margin_m !== undefined && c.d.well_margin_m < S.thresholds.wellMarginM, clear: c => c.d.well_margin_m > S.thresholds.wellMarginM + 1.5, dur: 3 },
-  { id: "overheat", sev: "warning", title: "Controller running hot", cond: c => c.d.ctrl_temp_c > S.thresholds.overheatC, clear: c => c.d.ctrl_temp_c < S.thresholds.overheatClearC, dur: 10 },
-  { id: "low_solar", sev: "warning", title: "Solar production lower than expected", cond: c => c.running && c.expPv && c.d.irradiance_wm2 > 450 && c.d.pv_power < c.expPv * S.thresholds.lowSolarPct / 100, clear: c => c.expPv && c.d.pv_power > c.expPv * (S.thresholds.lowSolarPct + 10) / 100, dur: () => S.thresholds.lowSolarMin },
-  { id: "tank_high", sev: "info", title: "Tank nearly full", cond: c => c.d.tank_level_pct > S.thresholds.tankHighPct, clear: c => c.d.tank_level_pct < S.thresholds.tankHighPct - 8, dur: 5 },
-  { id: "tank_low", sev: "warning", title: "Tank level low", cond: c => c.d.tank_level_pct < S.thresholds.tankLowPct, clear: c => c.d.tank_level_pct > S.thresholds.tankLowPct + 8, dur: 10 },
-  { id: "overcurrent", sev: "critical", title: "Motor current above rating", cond: c => c.d.pump_current > c.p.I * 1.12, clear: c => c.d.pump_current < c.p.I, dur: 2 },
+  { id: "dry_run", sev: "critical", title: tlk("Possible dry-run"), cond: c => c.d.fault === "E-DRY" || (c.running && c.p.sensors.includes("well_level_m") && c.d.well_level_m > well(c.p).pumpDepth - 1.2 && c.d.flow_lpm < c.p.Q * 0.3), clear: c => c.d.fault !== "E-DRY" && !c.running || (c.d.flow_lpm > c.p.Q * 0.4), dur: 0 },
+  { id: "pump_fault", sev: "critical", title: tlk("Pump controller fault"), cond: c => c.d.fault === "E-OT", clear: c => !c.d.fault, dur: 0 },
+  { id: "no_flow", sev: "critical", title: tlk("No flow while running"), cond: c => c.running && c.d.flow_lpm < S.thresholds.noFlowLpm && c.d.pump_power_pct > 40, clear: c => !c.running || c.d.flow_lpm > S.thresholds.noFlowLpm * 3, dur: 5 },
+  { id: "low_flow", sev: "warning", title: tlk("Water production below expected"), cond: c => c.exp && c.d.flow_lpm < c.exp * S.thresholds.lowFlowPct / 100, clear: c => !c.running || (c.exp && c.d.flow_lpm > c.exp * S.thresholds.lowFlowClearPct / 100), dur: () => S.thresholds.lowFlowMin },
+  { id: "low_well", sev: "warning", title: tlk("Well level close to minimum safe level"), cond: c => c.d.well_margin_m !== undefined && c.d.well_margin_m < S.thresholds.wellMarginM, clear: c => c.d.well_margin_m > S.thresholds.wellMarginM + 1.5, dur: 3 },
+  { id: "overheat", sev: "warning", title: tlk("Controller running hot"), cond: c => c.d.ctrl_temp_c > S.thresholds.overheatC, clear: c => c.d.ctrl_temp_c < S.thresholds.overheatClearC, dur: 10 },
+  { id: "low_solar", sev: "warning", title: tlk("Solar production lower than expected"), cond: c => c.running && c.expPv && c.d.irradiance_wm2 > 450 && c.d.pv_power < c.expPv * S.thresholds.lowSolarPct / 100, clear: c => c.expPv && c.d.pv_power > c.expPv * (S.thresholds.lowSolarPct + 10) / 100, dur: () => S.thresholds.lowSolarMin },
+  { id: "tank_high", sev: "info", title: tlk("Tank nearly full"), cond: c => c.d.tank_level_pct > S.thresholds.tankHighPct, clear: c => c.d.tank_level_pct < S.thresholds.tankHighPct - 8, dur: 5 },
+  { id: "tank_low", sev: "warning", title: tlk("Tank level low"), cond: c => c.d.tank_level_pct < S.thresholds.tankLowPct, clear: c => c.d.tank_level_pct > S.thresholds.tankLowPct + 8, dur: 10 },
+  { id: "overcurrent", sev: "critical", title: tlk("Motor current above rating"), cond: c => c.d.pump_current > c.p.I * 1.12, clear: c => c.d.pump_current < c.p.I, dur: 2 },
 ];
-export const RULE_TXT = { comms_loss: "IoT device not reporting" };
+export const RULE_TXT = { comms_loss: tlk("IoT device not reporting") };
 export function runAlerts(p) {
   const s = SIM[p.id]; s.al = s.al || {};
   const pt = last(p.id), d = dev(p);
   // communication loss is judged on the cloud side from heartbeat age
   const age = (S.now - d.lastHeartbeat) / MIN;
-  ruleTick(p, { id: "comms_loss", sev: "warning", title: "IoT device not reporting" }, age > S.thresholds.commsLossMin, age < 2, 0, { "Last data": fmtAgo(d.lastHeartbeat) });
+  ruleTick(p, { id: "comms_loss", sev: "warning", title: tlk("IoT device not reporting") }, age > S.thresholds.commsLossMin, age < 2, 0, { [tlk("Last data")]: fmtAgo(d.lastHeartbeat, true) });
   if (!pt || pt.t < S.now - 20 * MIN) return; // no fresh data: don't judge pump conditions on stale values
   const dd = derived(p, pt), c = { p, d: dd, running: pt.s === "running", exp: pt.s === "running" ? expFlow(p, dd.pump_power) : null, expPv: expPV(p, dd.irradiance_wm2) };
   for (const r of RULES) {
     let on; try { on = !!r.cond(c); } catch (e) { on = false; }
     let off; try { off = !!r.clear(c); } catch (e) { off = true; }
-    const ev = { Flow: dd.flow_lpm != null ? dd.flow_lpm + " L/min" : undefined, Expected: c.exp ? r1(c.exp) + " L/min" : undefined, "Pump power": dd.pump_power + " W", "Well level": dd.well_level_m != null ? dd.well_level_m + " m below ground" : undefined, "Controller temp": dd.ctrl_temp_c != null ? dd.ctrl_temp_c + " °C" : undefined, Fault: dd.fault || undefined };
+    const ev = { [tlk("Flow")]: dd.flow_lpm != null ? dd.flow_lpm + " L/min" : undefined, [tlk("Expected")]: c.exp ? r1(c.exp) + " L/min" : undefined, [tlk("Pump power")]: dd.pump_power + " W", [tlk("Well level")]: dd.well_level_m != null ? dd.well_level_m + tlk(" m below ground") : undefined, [tlk("Controller temp")]: dd.ctrl_temp_c != null ? dd.ctrl_temp_c + " °C" : undefined, [tlk("Fault")]: dd.fault || undefined };
     ruleTick(p, r, on, off, typeof r.dur === "function" ? r.dur() : r.dur, ev);
   }
 }
@@ -433,23 +434,23 @@ export function escalate() {
 }
 /* ---------- NOTIFICATION SERVICE: provider-agnostic channel adapters ---------- */
 export const CHANNELS = {
-  in_app: { label: "In-app", send: n => true },
-  email: { label: "Email", send: n => false }, whatsapp: { label: "WhatsApp", send: n => false }, telegram: { label: "Telegram", send: n => false }, sms: { label: "SMS", send: n => false },
+  in_app: { label: tlk("In-app"), send: n => true },
+  email: { label: tlk("Email"), send: n => false }, whatsapp: { label: tlk("WhatsApp"), send: n => false }, telegram: { label: tlk("Telegram"), send: n => false }, sms: { label: tlk("SMS"), send: n => false },
 };
 export function notify(orgId, sev, text, pumpId, toRole, alarmId) {
   const n = { id: uid("N"), org: orgId, sev, text, pump: pumpId, at: S.now, read: false, toRole: toRole || (sev === "critical" ? "ops" : "all"), alarm: alarmId };
   S.notifications.unshift(n); if (S.notifications.length > 400) S.notifications.length = 400;
   if (sev !== "info") for (const [k, ch] of Object.entries(S.channels)) if (k !== "in_app" && ch.on) {
-    S.outbox.unshift({ id: uid("OB"), org: orgId, channel: k, text, at: S.now, status: ch.configured ? "sent" : "queued — provider not configured" });
+    S.outbox.unshift({ id: uid("OB"), org: orgId, channel: k, text, at: S.now, status: ch.configured ? "sent" : tlk("queued — provider not configured") });
   }
   if (S.outbox.length > 300) S.outbox.length = 300;
-  if (S.ready && orgId === S.orgId && sev !== "info") toast(text);
+  if (S.ready && orgId === S.orgId && sev !== "info") toast(tlx(text));
 }
 
 /* ---------- COMMAND SERVICE: authorised, logged, acknowledged by device ---------- */
 export function issueCommand(p, cmd, reason) {
-  if (!can("command")) { toast("Your role can't send pump commands."); return null; }
-  const c = { id: uid("CMD"), org: p.org, pump: p.id, cmd, reason: reason || "", by: S.session.userId, at: S.now, status: "queued", log: [[S.now, "Queued — waiting for device to connect"]] };
+  if (!can("command")) { toast(tl("Your role can't send pump commands.")); return null; }
+  const c = { id: uid("CMD"), org: p.org, pump: p.id, cmd, reason: reason || "", by: S.session.userId, at: S.now, status: "queued", log: [[S.now, tlk("Queued — waiting for device to connect")]] };
   S.commands.unshift(c); SIM[p.id].pending.push(c.id);
   audit(S.session.userId, "Pump command: " + cmd, p.id, null, reason ? "Reason: " + reason : "");
   return c;
@@ -477,12 +478,12 @@ export function audit(by, action, asset, oldV, newV) { S.audit.unshift({ id: uid
 export const pad = n => String(n).padStart(2, "0");
 export function wib(t) { return new Date(t + TZ); }
 export function fmtTime(t) { const d = wib(t); return pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()); }
-export const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-export function fmtDate(t) { const d = wib(t); return d.getUTCDate() + " " + MON[d.getUTCMonth()]; }
-export function fmtDT(t) { return (dk(t) === dk(S.now) ? "Today" : dk(t) === dk(S.now) - 1 ? "Yesterday" : fmtDate(t)) + " " + fmtTime(t); }
-export function fmtAgo(t) { if (!t) return "never"; const m = Math.round((S.now - t) / MIN); if (m < 1) return "just now"; if (m < 60) return m + " min ago"; const h = Math.floor(m / 60); if (h < 24) return h + " h " + (m % 60 ? (m % 60) + " min " : "") + "ago"; return Math.floor(h / 24) + " d ago"; }
-export function fmtDur(min) { min = Math.round(min); if (min < 60) return min + " min"; return Math.floor(min / 60) + " h " + pad(min % 60) + " m"; }
-export const fmtN = (v, d = 0) => v == null || isNaN(v) ? "—" : Number(v).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+export const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(tlk), DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(tlk);
+export function fmtDate(t) { const d = wib(t); return d.getUTCDate() + " " + tlx(MON[d.getUTCMonth()]); }
+export function fmtDT(t) { return (dk(t) === dk(S.now) ? tl("Today") : dk(t) === dk(S.now) - 1 ? tl("Yesterday") : fmtDate(t)) + " " + fmtTime(t); }
+export function fmtAgo(t, en) { if (!t) return en ? "never" : tl("never"); const m = Math.round((S.now - t) / MIN); if (m < 1) return en ? "just now" : tl("just now"); const h = Math.floor(m / 60); if (en) return m < 60 ? m + " min ago" : h < 24 ? h + " h " + (m % 60 ? (m % 60) + " min " : "") + "ago" : Math.floor(h / 24) + " d ago"; if (m < 60) return tl("{m} min ago", { m }); if (h < 24) return m % 60 ? tl("{h} h {m} min ago", { h, m: m % 60 }) : tl("{h} h ago", { h }); return tl("{d} d ago", { d: Math.floor(h / 24) }); }
+export function fmtDur(min) { min = Math.round(min); if (min < 60) return tl("{n} min", { n: min }); return tl("{h} h {m} m", { h: Math.floor(min / 60), m: pad(min % 60) }); }
+export const fmtN = (v, d = 0) => v == null || isNaN(v) ? "—" : Number(v).toLocaleString(I18N.lang === "id" ? "id-ID" : "en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
 
 /* ---------- DOM utils (shared with the UI layer) ---------- */
 export const $ = (s, r = document) => r.querySelector(s);

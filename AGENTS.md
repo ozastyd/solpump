@@ -84,10 +84,17 @@ re-exports, `export { a as b }`) requires extending the strip logic in `build.sh
   Unknown hashes fall back to `ROUTES.overview`. `live: false` opts that screen out of the auto re-render.
 - Main loop (`ui4.js`, 2 s `setInterval`): advances the simulated clock (`S.speed` 1×/10×, pause) and
   re-renders the current route unless a modal is open, the user is typing, or `live: false`.
-- State is in-memory only: reload = fresh seed. No localStorage/fetch/persistence exists anywhere.
+- State is in-memory only: reload = fresh seed. No fetch/persistence exists anywhere. The one exception is the UI language (`solpump.lang` in localStorage, try/catch-wrapped, see i18n below).
 - Multi-tenant demo: `S.orgId`, permissions via `can()`, list scoping via `scoped()`. Gate new screens
   inside the route itself (`if (!can("x")) …`).
 - A metric the pump lacks renders "no sensor" (`nos()`) — never 0.
+
+## i18n (English + Bahasa Indonesia)
+
+- `src/i18n.js` (no imports besides the dictionaries) exports `tl("English {x}", {x})` (render-time translate; key = the English string), `tlk("…")` (marks module-level string constants; translate at use with `tlx(CONST[k])`) and `tlx(stored)` (runtime lookup for strings stored in state: exact entry, then `PAT_*` regexes). Language switch: `setLang()` + `renderAll(true)`; selector is `langSel()`/`bindLang()` in `ui1.js` (top bar + login).
+- Dictionaries: `src/id-core.js`, `id-intel.js`, `id-ui1..4.js` (`ID_*` objects, `PAT_*` arrays), one per source file. `tl()` takes a plain string literal only — interpolate with `{placeholders}`; plural forms are separate literals. Never name a variable `tl`; the function is deliberately not `t` (collides with local variables).
+- `npm run verify` runs `tools/i18n-check.mjs`: every `tl()`/`tlk()` literal must have an Indonesian entry with matching placeholders. New display text = wrap it + add the entry. Stored English strings (alarm titles, audit actions, task text…) are translated at display with `tlx()`.
+- `memo()` caches in `ui1.js` key on `I18N.lang`; `fmtN` switches to `id-ID` number formatting. Adding a dictionary file: add it to `i18n.js`, `build.sh`, `tools/verify.mjs` and `tools/i18n-check.mjs`.
 
 ## Conventions (match the file you're editing)
 
