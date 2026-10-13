@@ -20,6 +20,15 @@ export const sev = s => `<span class="sev ${s}">${s === "critical" ? tl("Critica
 export const hbar = s => `<span class="health"><b class="num" style="font-size:16px;color:var(--${hColor(s)})">${s}</b><span class="hb"><i style="width:${s}%;background:var(--${hColor(s)})"></i></span></span>`;
 export const nos = (txt) => `<span class="na">${txt ?? tl("no sensor")}</span>`;
 export function go(h) { location.hash = h; }
+let VT = false;
+const canVT = () => !!document.startViewTransition && !(typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+/* pump card -> pump page: the card and the page header share a view-transition name so the card grows into the header (MOTION.md) */
+export function navTo(hash, src) {
+  const card = src && src.closest ? src.closest(".pc, .pcard") : null;
+  if (!card || !canVT() || !hash.startsWith("#/pump/") || location.hash === hash) return go(hash);
+  card.style.viewTransitionName = "pump-hero"; VT = true;
+  document.startViewTransition(() => new Promise(res => { card.style.viewTransitionName = ""; window.addEventListener("hashchange", () => setTimeout(res), { once: true }); go(hash); })).finished.finally(() => { VT = false; });
+}
 
 /* ---------- icons ---------- */
 export const IC = {
@@ -165,10 +174,12 @@ export function renderAll(keepScroll) {
   renderTop(out.title || "", out.crumb);
   if (out.after) out.after();
   if (keepScroll && v) v.scrollTop = sc;
-  const nv = $("#view"); if (nv && VIEW.r !== PREVR) { nv.classList.remove("route-in"); void nv.offsetWidth; nv.classList.add("route-in"); } PREVR = VIEW.r;
+  if (VT) { const ph = $("#view .phead"); if (ph) ph.style.viewTransitionName = "pump-hero"; }
+  const nv = $("#view"); if (nv && VIEW.r !== PREVR && !VT) { nv.classList.remove("route-in"); void nv.offsetWidth; nv.classList.add("route-in"); } PREVR = VIEW.r;
   settle(nv || document);
 }
 const closeSide = () => $("#side")?.classList.remove("open");
+document.addEventListener("click", e => { const a = e.target.closest('.pcard a[href^="#/pump/"]'); if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button || !canVT()) return; e.preventDefault(); navTo(a.getAttribute("href"), a); });
 window.addEventListener("hashchange", () => { closeSide(); renderAll(); $("#view")?.scrollTo(0, 0); });
 document.addEventListener("click", e => { const s = $("#side"); if (!s?.classList.contains("open")) return; if (e.target.closest("#side a")) return closeSide(); if (s.contains(e.target) || e.target.closest("#mb")) return; e.preventDefault(); e.stopPropagation(); closeSide(); }, true);
 export function setView(html) { $("#view").innerHTML = html; }
@@ -253,7 +264,7 @@ ROUTES.overview = () => {
    <div class="pgrid2">${filt.length ? filt.map(pumpCard).join("") : `<div class="muted">${tl("No pumps visible to you yet.")}</div>`}</div></section>`);
   return { title: tl("Fleet overview"), after() { bindRows(); bindMap(); document.querySelectorAll("[data-site]").forEach(b => b.onclick = () => { UI.site = b.dataset.site; renderAll(true); }); } };
 };
-export function bindRows() { document.querySelectorAll("[data-p]").forEach(r => { const f = () => go(`#/pump/${r.dataset.p}${r.dataset.tab ? "/" + r.dataset.tab : ""}`); r.onclick = f; r.onkeydown = e => { if (e.key === "Enter") f(); }; }); }
+export function bindRows() { document.querySelectorAll("[data-p]").forEach(r => { const f = () => navTo(`#/pump/${r.dataset.p}${r.dataset.tab ? "/" + r.dataset.tab : ""}`, r); r.onclick = f; r.onkeydown = e => { if (e.key === "Enter") f(); }; }); }
 
 /* ---------- MAP ---------- */
 export function mapSvg(ps, simple) {

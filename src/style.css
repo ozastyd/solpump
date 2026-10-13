@@ -498,3 +498,14 @@ details pre,.code{background:var(--paper);border:1px solid var(--line2);border-r
   .btn,.pc,.kt,.nav a,.bnav a,.bnav button,.seg button,.tabs button,.ai{transition:background-color 120ms,border-color 120ms,color 120ms!important}
   .btn:active,.pc:active,.kt:active,.nav a:active,.bnav a:active,.bnav button:active,.seg button:active,.ai:active{transform:none!important}
 }
+
+/* card -> page shared element (view transitions) */
+.phead{background:var(--card);border:1px solid var(--line);border-radius:var(--r3);padding:16px 18px}
+::view-transition-old(root),::view-transition-new(root){animation-duration:var(--m-base);animation-timing-function:var(--e-out)}
+::view-transition-group(pump-hero){animation-duration:var(--m-large);animation-timing-function:var(--e-out)}
+::view-transition-old(pump-hero),::view-transition-new(pump-hero){border-radius:var(--r3);overflow:hidden;mix-blend-mode:normal}
+::view-transition-old(pump-hero){animation:vt-out 140ms var(--e-out) both}
+::view-transition-new(pump-hero){animation:vt-in var(--m-large) var(--e-out) 40ms both}
+@keyframes vt-out{to{opacity:0}}
+@keyframes vt-in{from{opacity:0}}
+@supports (animation-timing-function:linear(0,1)){::view-transition-group(pump-hero){animation-timing-function:var(--spring-smooth)}}
