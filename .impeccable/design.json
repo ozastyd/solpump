@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T15:00:00Z",
+  "title": "Design System: SolPump Operations",
+  "extensions": {
+    "colorMeta": {
+      "deep": { "role": "primary", "displayName": "Console Pine", "canonical": "#0A3A27", "tonalRamp": ["#0b412c", "#14734d", "#1ca56f", "#25d690", "#54e2aa", "#86eac2", "#b8f3db", "#e9fbf4"] },
+      "deep2": { "role": "primary", "displayName": "Pine Lift", "canonical": "#0E4A32", "tonalRamp": ["#0c402b", "#15714d", "#1fa26e", "#28d38f", "#57dfa8", "#88e8c2", "#b9f2db", "#eafbf4"] },
+      "brand": { "role": "primary", "displayName": "Pump Green", "canonical": "#0C7F48", "tonalRamp": ["#074628", "#0c7b46", "#11b064", "#16e682", "#48ee9e", "#7df3bb", "#b2f8d7", "#e8fdf3"] },
+      "sun": { "role": "accent", "displayName": "Signal Yellow", "canonical": "#F7DC00", "tonalRamp": ["#4d4400", "#877800", "#c1ac00", "#fbe000", "#ffe937", "#ffef71", "#fff6ab", "#fffce5"] },
+      "paper": { "role": "neutral", "displayName": "Mist Paper", "canonical": "#F2F5F3", "tonalRamp": ["#212b25", "#3b4c40", "#546d5c", "#6d8e78", "#8ea896", "#afc1b5", "#d0dbd3", "#f1f4f2"] },
+      "card": { "role": "neutral", "displayName": "Instrument White", "canonical": "#FFFFFF", "tonalRamp": ["#262626", "#434343", "#616161", "#7e7e7e", "#9b9b9b", "#b8b8b8", "#d5d5d5", "#f2f2f2"] },
+      "ink": { "role": "neutral", "displayName": "Field Ink", "canonical": "#16251E", "tonalRamp": ["#1d3027", "#325545", "#487962", "#5e9e80", "#81b49d", "#a6cab9", "#cae0d6", "#eff5f2"] },
+      "ink2": { "role": "neutral", "displayName": "Slate Fern", "canonical": "#4A5B53", "tonalRamp": ["#222a26", "#3c4a44", "#576a61", "#718b7e", "#91a59b", "#b1bfb8", "#d1d9d5", "#f1f4f2"] },
+      "ink3": { "role": "neutral", "displayName": "Fern Grey", "canonical": "#63746C", "tonalRamp": ["#232926", "#3e4944", "#596861", "#74887e", "#93a39b", "#b2beb8", "#d2d8d5", "#f1f3f2"] },
+      "line": { "role": "neutral", "displayName": "Hairline Green", "canonical": "#D7E0DB", "tonalRamp": ["#212b26", "#3b4c42", "#546d5f", "#6e8e7c", "#8ea899", "#afc1b7", "#d0dad5", "#f1f4f2"] },
+      "line2": { "role": "neutral", "displayName": "Hairline Faint", "canonical": "#E8EEEA", "tonalRamp": ["#212c24", "#394e40", "#526f5c", "#6b9177", "#8caa96", "#adc3b4", "#cfdbd3", "#f0f4f2"] },
+      "ok": { "role": "status", "displayName": "Verified Green", "canonical": "#157A40", "tonalRamp": ["#0a3d20", "#14753e", "#1ca557", "#25d570", "#56e191", "#91e4b4", "#c5ecd6", "#edf8f1"] },
+      "okbg": { "role": "status", "displayName": "Verified Tint", "canonical": "#E3F4EA", "tonalRamp": ["#163723", "#26613e", "#368b59", "#47b474", "#6fc693", "#99d7b2", "#c3e7d2", "#edf8f1"] },
+      "warn": { "role": "status", "displayName": "Caution Amber", "canonical": "#8A5D00", "tonalRamp": ["#473000", "#8a5d00", "#c28300", "#faa800", "#febe39", "#f5cf7f", "#f4e2bd", "#faf5eb"] },
+      "warnbg": { "role": "status", "displayName": "Caution Tint", "canonical": "#FFF4D6", "tonalRamp": ["#4d3800", "#876300", "#c18d00", "#fbb800", "#ffc937", "#ffd971", "#ffe9ab", "#fff8e5"] },
+      "crit": { "role": "status", "displayName": "Alarm Red", "canonical": "#B02E24", "tonalRamp": ["#3b0f0c", "#721e17", "#a12a21", "#cf362a", "#dc645b", "#e19993", "#ebc9c7", "#f7eeed"] },
+      "critbg": { "role": "status", "displayName": "Alarm Tint", "canonical": "#FCE6E3", "tonalRamp": ["#450f07", "#7a1a0d", "#ae2513", "#e33118", "#ec5d4a", "#f18c7f", "#f7bbb3", "#fdeae8"] },
+      "off": { "role": "status", "displayName": "Standby Grey", "canonical": "#5E6A65", "tonalRamp": ["#222624", "#414946", "#5b6762", "#75847e", "#96a19d", "#b7bebb", "#d7dad9", "#f2f3f2"] },
+      "offbg": { "role": "status", "displayName": "Standby Tint", "canonical": "#ECEFED", "tonalRamp": ["#232a25", "#3e4941", "#58695e", "#73887a", "#92a398", "#b2beb6", "#d2d9d4", "#f1f3f2"] },
+      "water": { "role": "domain", "displayName": "Hydro Blue", "canonical": "#1B6CA8", "tonalRamp": ["#0b2a42", "#134b74", "#1b6ba6", "#238bd9", "#52a6e3", "#85c0eb", "#b7daf3", "#e9f4fb"] },
+      "solar": { "role": "domain", "displayName": "PV Gold", "canonical": "#D49A00", "tonalRamp": ["#4d3800", "#876200", "#c18c00", "#fbb700", "#ffc837", "#ffd871", "#ffe8ab", "#fff8e5"] },
+      "power": { "role": "domain", "displayName": "Grid Violet", "canonical": "#7A4FB5", "tonalRamp": ["#241736", "#3f285f", "#5a3988", "#764ab1", "#9472c4", "#b39bd5", "#d2c4e6", "#f1edf7"] },
+      "well": { "role": "domain", "displayName": "Aqua Teal", "canonical": "#2F8C83", "tonalRamp": ["#133936", "#22655e", "#319187", "#3fbcb0", "#69cdc3", "#95dbd4", "#c0eae6", "#ecf9f7"] },
+      "press": { "role": "domain", "displayName": "Pressure Rust", "canonical": "#B5523B", "tonalRamp": ["#3a1a13", "#662e21", "#92422f", "#be563e", "#ce7b68", "#dca194", "#eac8c0", "#f9eeec"] },
+      "focus": { "role": "focus", "displayName": "Focus Blue", "canonical": "#1B6CA8", "tonalRamp": ["#0b2a42", "#134b74", "#1b6ba6", "#238bd9", "#52a6e3", "#85c0eb", "#b7daf3", "#e9f4fb"] }
+    },
+    "typographyMeta": {
+      "body": { "displayName": "Barlow", "purpose": "All interface copy, titles, labels — 15px/1.45 base, system-ui fallback." },
+      "num": { "displayName": "Barlow Semi Condensed", "purpose": "Every figure, metric, timestamp, count — always with tabular numerals." }
+    },
+    "shadows": [
+      { "name": "overlay-popup", "value": "0 8px 24px rgba(0,0,0,.18)", "purpose": "Map popup floating over the map." },
+      { "name": "overlay-modal", "value": "0 20px 60px rgba(0,0,0,.3)", "purpose": "Dialog over scrim." },
+      { "name": "overlay-toast", "value": "0 6px 20px rgba(0,0,0,.25)", "purpose": "Transient notification." },
+      { "name": "overlay-drawer", "value": "-10px 0 30px rgba(0,0,0,.12)", "purpose": "Right-side drawer separation." },
+      { "name": "ring-active", "value": "0 0 0 1px var(--line)", "purpose": "1px active ring on pressed pill buttons — not a shadow." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": ".2s", "purpose": "Default transition length for state changes (sidebar slide, hovers)." },
+      { "name": "reduced-motion", "value": "none", "purpose": "prefers-reduced-motion disables all transitions and animations." }
+    ],
+    "breakpoints": [
+      { "name": "kpi-wrap", "value": "1280px" },
+      { "name": "single-column", "value": "1100px" },
+      { "name": "sidebar-drawer", "value": "900px" },
+      { "name": "compact-top", "value": "700px" },
+      { "name": "compact-view", "value": "600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button Default",
+      "kind": "button",
+      "refersTo": "btn",
+      "description": "Secondary/neutral action button — hairline card-fill.",
+      "html": "<button class=\"ds-btn\">Export</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 12px;cursor:pointer;font:500 14px/1.45 Barlow,system-ui,sans-serif;color:var(--ink);transition:border-color .2s}.ds-btn:hover{border-color:var(--ink3)}.ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.ds-btn.ds-sm{padding:3px 9px;font-size:13px}"
+    },
+    {
+      "name": "Button Primary",
+      "kind": "button",
+      "refersTo": "btn-pri",
+      "description": "Primary action — Pump Green fill, white label.",
+      "html": "<button class=\"ds-btn-pri\">Acknowledge</button>",
+      "css": ".ds-btn-pri{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font:500 14px/1.45 Barlow,system-ui,sans-serif;transition:background .2s}.ds-btn-pri:hover{background:#0A6B3C;border-color:#0A6B3C}.ds-btn-pri:focus-visible{outline:2px solid var(--focus);outline-offset:2px}"
+    },
+    {
+      "name": "Button Danger",
+      "kind": "button",
+      "refersTo": "btn-danger",
+      "description": "Destructive action — Alarm Red fill, white label.",
+      "html": "<button class=\"ds-btn-danger\">Stop pump</button>",
+      "css": ".ds-btn-danger{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--crit);background:var(--crit);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font:500 14px/1.45 Barlow,system-ui,sans-serif;transition:filter .2s}.ds-btn-danger:hover{filter:brightness(.92)}.ds-btn-danger:focus-visible{outline:2px solid var(--focus);outline-offset:2px}"
+    },
+    {
+      "name": "Status Pill",
+      "kind": "chip",
+      "refersTo": "pill",
+      "description": "Tinted status chip — the four canonical pairs with leading dot.",
+      "html": "<span class=\"ds-pill ds-ok\"><i></i>running</span> <span class=\"ds-pill ds-crit\"><i></i>crit</span> <span class=\"ds-pill ds-warn\"><i></i>derated</span> <span class=\"ds-pill ds-off\"><i></i>maintenance</span>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px 2px 8px;font:500 13px/1.35 Barlow,system-ui,sans-serif;white-space:nowrap}.ds-pill i{width:7px;height:7px;border-radius:999px;background:currentColor;flex:none}.ds-pill.ds-ok{background:var(--okbg);color:var(--ok)}.ds-pill.ds-warn{background:var(--warnbg);color:var(--warn)}.ds-pill.ds-crit{background:var(--critbg);color:var(--crit)}.ds-pill.ds-off{background:var(--offbg);color:var(--off)}"
+    },
+    {
+      "name": "Nav Link",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Sidebar item with hover, active (Signal Yellow bar), and count badge states.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"17\" height=\"17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\"/></svg>Overview</a><a class=\"ds-nav-link is-on\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"17\" height=\"17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 3\"/></svg>Alerts<span class=\"ds-cnt\">7</span></a></nav>",
+      "css": ".ds-nav{background:#0A3A27;padding:6px 8px 12px;display:flex;flex-direction:column;gap:1px;border-radius:0;width:260px}.ds-nav-link{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;color:#DCEBE2;text-decoration:none;position:relative;font:500 14px/1.35 Barlow,system-ui,sans-serif}.ds-nav-link:hover{background:rgba(255,255,255,.06)}.ds-nav-link.is-on{background:rgba(255,255,255,.1);color:#fff}.ds-nav-link.is-on::before{content:\"\";position:absolute;left:-8px;top:6px;bottom:6px;width:4px;border-radius:0 3px 3px 0;background:#F7DC00}.ds-nav-link svg{width:17px;height:17px;flex:none;opacity:.9}.ds-cnt{margin-left:auto;font:600 12px \"Barlow Semi Condensed\",\"Arial Narrow\",sans-serif;background:#B02E24;color:#fff;border-radius:999px;padding:0 7px;line-height:18px}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "button",
+      "refersTo": "seg",
+      "description": "Filter/toggle group — shared bordered container, active segment in Console Pine.",
+      "html": "<div class=\"ds-seg\"><button class=\"is-on\">Cards</button><button>Matrix</button></div>",
+      "css": ".ds-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}.ds-seg button{border:0;background:transparent;padding:5px 11px;cursor:pointer;font:400 13px/1.45 Barlow,system-ui,sans-serif;color:var(--ink2);border-right:1px solid var(--line2)}.ds-seg button:last-child{border-right:0}.ds-seg button:hover{color:var(--ink)}.ds-seg button.is-on{background:#0A3A27;color:#fff}.ds-seg button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}"
+    },
+    {
+      "name": "KPI Cell",
+      "kind": "card",
+      "refersTo": "kpi",
+      "description": "Cell inside the bordered KPI strip — muted label over a numeric figure.",
+      "html": "<div class=\"ds-kpis\"><div class=\"ds-kpi\"><div class=\"ds-kpi-l\">Flow today</div><div class=\"ds-kpi-v\">4,281 <span>m³</span></div></div><div class=\"ds-kpi\"><div class=\"ds-kpi-l\">Running</div><div class=\"ds-kpi-v\">142 <span>/ 168</span></div></div></div>",
+      "css": ".ds-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}.ds-kpi{padding:10px 12px;border-right:1px solid var(--line2);min-width:0}.ds-kpi:last-child{border-right:0}.ds-kpi-l{font:500 12px/1.3 Barlow,system-ui,sans-serif;color:var(--ink3);text-transform:none}.ds-kpi-v{font:600 20px/1.15 \"Barlow Semi Condensed\",\"Arial Narrow\",sans-serif;font-variant-numeric:tabular-nums;color:var(--ink);margin-top:2px}.ds-kpi-v span{font-size:13px;font-weight:500;color:var(--ink3)}"
+    },
+    {
+      "name": "Data Card",
+      "kind": "card",
+      "refersTo": "pcard",
+      "description": "Standard content card — 12px radius, hairline, flat at rest.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-t\">PUMP-03 · North Ridge</div><span class=\"ds-pill ds-ok\"><i></i>running</span></div>",
+      "css": ".ds-card{display:flex;flex-direction:column;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:280px}.ds-card-t{font:600 15px/1.3 Barlow,system-ui,sans-serif;color:var(--ink)}.ds-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px 2px 8px;font:500 13px/1.35 Barlow,system-ui,sans-serif;white-space:nowrap;width:max-content}.ds-pill i{width:7px;height:7px;border-radius:999px;background:currentColor;flex:none}.ds-pill.ds-ok{background:var(--okbg);color:var(--ok)}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Basic field — 4px radius hairline, inherits type, blue focus.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search pumps…\">",
+      "css": ".ds-input{border:1px solid var(--line);background:var(--card);border-radius:4px;padding:5px 8px;font:400 15px/1.45 Barlow,system-ui,sans-serif;color:var(--ink);min-width:200px}.ds-input::placeholder{color:var(--ink3)}.ds-input:focus{outline:2px solid var(--focus);outline-offset:-1px;border-color:var(--focus)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Field Console",
+    "overview": "SolPump Operations looks like instrumentation built for people who watch water move: a dark pine sidebar housing the controls, a bright instrument face where the data lives, and status communicated in tinted chips that can be read in one sweep. Every panel earns its place by carrying a number, a state, or a control — decoration that does not help someone scan loses. The aesthetic philosophy is operational credibility: this should feel like software a utility would actually run, not a marketing mock of one.\n\nLight theme is the default (misty paper background, white instrument cards); dark theme is a first-class twin driven by prefers-color-scheme and [data-theme], never an afterthought. Confirmed visual rejections: shadows as hierarchy, gradients, glow, and any hue outside the token set.",
+    "keyCharacteristics": [
+      "Hairline borders and tinted surfaces carry hierarchy; surfaces are flat at rest",
+      "All figures set in Barlow Semi Condensed with tabular numerals for column alignment",
+      "Status always arrives as a tinted pill pair (tint background + saturated text), never bare color",
+      "Signal Yellow (#F7DC00) marks the live/demo state and nothing else",
+      "Dense but breathing: 4–14px padding steps, generous whitespace only around narrative copy"
+    ],
+    "rules": [
+      { "name": "The Signal Yellow Rule", "body": "#F7DC00 marks liveness (active nav indicator, DEMO badge, demo clock pill). Its rarity is the point — never use it for body text, large fills, or generic highlights.", "section": "colors" },
+      { "name": "The Status Pair Rule", "body": "Status color never appears as bare text or bare fill: it is always the semantic tint background with the saturated semantic text on top, inside a pill.", "section": "colors" },
+      { "name": "The Tabular Figure Rule", "body": "Anything that is a number in a column uses the numeric family with tabular figures — alignment is part of credibility.", "section": "typography" },
+      { "name": "The Overlay-Only Shadow Rule", "body": "Shadows exist only on things that physically float above the page (popup, modal, toast, drawer). Content cards stay flat; if you need separation, reach for a border or the surface step first.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do set every metric in the numeric family with tabular figures (var(--num) + tabular-nums)",
+      "Do express status as tinted pill pairs (tint bg + saturated text) — four canonical pairs only",
+      "Do separate surfaces with hairlines (--line/--line2) and the paper↔card step before considering a shadow",
+      "Do keep AA text contrast in both themes (muted text ≥ 4.5:1 on its surface)",
+      "Do mark absent data as \"no sensor\", never as 0",
+      "Do reserve Signal Yellow for live/demo indicators"
+    ],
+    "donts": [
+      "Don't add shadows to content cards — overlays only",
+      "Don't introduce hues outside the token set, gradients, or glow effects",
+      "Don't use Signal Yellow as text or a large fill",
+      "Don't let numbers default to the body font in tables or KPI strips",
+      "Don't animate under prefers-reduced-motion (all transitions are already disabled there)"
+    ]
+  }
+}

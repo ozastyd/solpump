@@ -1,7 +1,7 @@
 /* ---------- modal ---------- */
 import { $, ADAPTERS, BASE, D, H, REG, ROLES, S, SIM, TZ, arr, audit, byId, can, ctl, dev, dk, expFlow, expPV, fmtAgo, fmtDT, fmtDate, fmtDur, fmtN, fmtTime, has, issueCommand, last, myPumps, pump, r1, site, tank, toast, user, well, wib, window_ } from './core.js';
 import { daily, hColor, perfRatio, today } from './intel.js';
-import { ROUTES, UI, barChart, diagM, esc, fiveQM, go, hbar, healthM, lineChart, pill, renderAll, setView, sev, statusM, wellM } from './ui1.js';
+import { ROUTES, UI, barChart, diagM, esc, fiveQM, go, hbar, healthM, lineChart, pill, renderAll, setView, sev, stCell, statusM, wellM } from './ui1.js';
 import { bindMaint, maintTab } from './ui3.js';
 export function modal({ title, body, ok = "Confirm", danger = false, onOk, cancel = "Cancel", wide }) {
   const m = $("#modal"); m.innerHTML = `<div class="modal-bg"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt" ${wide ? 'style="max-width:720px"' : ""}><div class="hd"><h2 id="mt">${esc(title)}</h2></div><div class="bd">${body}</div><div class="ft"><button class="btn" id="m-c">${cancel}</button>${onOk ? `<button class="btn ${danger ? "danger" : "pri"}" id="m-o">${esc(ok)}</button>` : ""}</div></div></div>`;
@@ -105,7 +105,7 @@ ROUTES.pump = (id, tab) => {
   else if (tab === "maintenance") body = maintTab(p);
   else body = twinTab(p);
   setView(`<div class="phead"><div style="flex:1;min-width:260px"><div class="nm">${esc(p.name)}</div><div class="sub">${esc(site(p.site).name)} · ${esc(p.mfr)} ${esc(p.model)} · <a href="#/overview">Back to fleet</a></div></div>
-   <div><div class="na">Pump</div>${pill(st.c, st.c === "off" ? "Unknown (offline)" : st.label)}</div><div><div class="na">IoT device</div>${pill(st.iot.c, st.iot.t)}</div>
+   <div><div class="na">Pump</div>${stCell(st)}</div><div><div class="na">IoT device</div>${pill(st.iot.c, st.iot.t)}</div>
    <div><div class="na">Health</div><div class="hscore"><b style="color:var(--${hColor(h.score)})">${h.score}</b><span class="muted">/100</span></div></div><div><div class="na">Last update</div><div>${fmtAgo(pt?.t)}</div></div></div>
    <div class="qs">${q.map(([qq, a]) => `<div class="q" style="--qc:var(--${a.c})"><div class="qq">${qq}</div><div class="qa"><span class="dot" style="background:var(--${a.c})"></span>${esc(a.a)}</div><div class="qd">${esc(a.d)}</div></div>`).join("")}</div>
    <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${tab === k}" class="${tab === k ? "on" : ""}" data-tab="${k}">${l}</button>`).join("")}</div>${body}`);

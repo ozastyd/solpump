@@ -1,3 +1,10 @@
 node_modules/
 dist/
 .vercel/
+
+.vercel
+
+# QA / impeccable local state (screenshots + live-server token)
+.shots/
+.impeccable/live/
+

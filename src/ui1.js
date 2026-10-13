@@ -9,6 +9,9 @@ export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;"
 export const UI = { range: "24h", from: null, to: null, tab: {}, site: "all", alertTab: "open", aTab: "water", aPer: "7d", puF: "all", puSite: "all", puSort: "urg", puView: "cards", rep: "daily", repPer: "7d", menu: false };
 export const DRAWER = {}; // top-bar drawers registered by ui4 (avoids ui1→ui4 cycle)
 export const pill = (c, t) => `<span class="pill ${c}">${esc(t)}</span>`;
+export const COND = { ok: "Healthy", warn: "Attention", crit: "Critical", off: "Offline" };
+export const condPill = c => pill(c, COND[c] || c);
+export const stCell = st => st.c === "off" ? condPill("off") : `<span class="stx">${esc(st.label)}</span>${condPill(st.c)}`;
 export const sev = s => `<span class="sev ${s}">${s === "critical" ? "Critical" : s === "warning" ? "Warning" : "Info"}</span>`;
 export const hbar = s => `<span class="health"><b class="num" style="font-size:16px;color:var(--${hColor(s)})">${s}</b><span class="hb"><i style="width:${s}%;background:var(--${hColor(s)})"></i></span></span>`;
 export const nos = (txt = "no sensor") => `<span class="na">${txt}</span>`;
@@ -148,9 +151,10 @@ export function renderAll(keepScroll) {
   renderTop(out.title || "", out.crumb);
   if (out.after) out.after();
   if (keepScroll && v) v.scrollTop = sc;
-  $("#side").classList.remove("open");
 }
-window.addEventListener("hashchange", () => { renderAll(); $("#view")?.scrollTo(0, 0); });
+const closeSide = () => $("#side")?.classList.remove("open");
+window.addEventListener("hashchange", () => { closeSide(); renderAll(); $("#view")?.scrollTo(0, 0); });
+document.addEventListener("click", e => { const s = $("#side"); if (!s?.classList.contains("open")) return; if (e.target.closest("#side a")) return closeSide(); if (s.contains(e.target) || e.target.closest("#mb")) return; e.preventDefault(); e.stopPropagation(); closeSide(); }, true);
 export function setView(html) { $("#view").innerHTML = html; }
 
 /* ---------- OVERVIEW ---------- */
@@ -174,9 +178,9 @@ export function fleetRow(p) {
   const st = statusM(p), pt = last(p.id), m = pt?.m || {}, h = healthM(p), t = today(p), off = st.c === "off";
   const val = (k, d, u) => !has(p, k) ? nos() : off ? `<span class="na">${fmtN(m[k], d)} ${u} (stale)</span>` : `<span class="num">${fmtN(m[k], d)}</span> <span class="na">${u}</span>`;
   return `<tr class="click" data-p="${p.id}"><td><b>${esc(p.short)}</b><div class="na">${esc(site(p.site).name.split(" — ")[0])}</div></td>
-   <td>${pill(st.c, st.c === "off" ? "Offline" : st.label)}<div class="na" style="max-width:30ch;white-space:normal">${esc(off ? st.detail : st.c !== "ok" && st.alarms[0] ? st.alarms[0].title : (st.detail || "").replace(/\.$/, ""))}</div></td>
-   <td class="r">${val("flow_lpm", 1, "L/min")}</td><td class="r opt">${val("pump_power", 0, "W")}</td><td class="r opt">${val("pv_power", 0, "W")}</td><td class="r opt">${val("well_level_m", 1, "m")}</td>
-   <td class="r"><span class="num">${fmtN(t.water, 1)}</span> <span class="na">m³</span></td><td class="r opt num">${fmtDur(t.run)}</td><td>${hbar(h.score)}</td>
+   <td>${stCell(st)}<div class="na" style="max-width:30ch;white-space:normal">${esc(off ? st.detail : st.c !== "ok" && st.alarms[0] ? st.alarms[0].title : (st.detail || "").replace(/\.$/, ""))}</div></td>
+   <td class="r" data-l="Flow">${val("flow_lpm", 1, "L/min")}</td><td class="r opt">${val("pump_power", 0, "W")}</td><td class="r opt">${val("pv_power", 0, "W")}</td><td class="r opt">${val("well_level_m", 1, "m")}</td>
+   <td class="r" data-l="Water today"><span class="num">${fmtN(t.water, 1)}</span> <span class="na">m³</span></td><td class="r opt num">${fmtDur(t.run)}</td><td data-l="Health">${hbar(h.score)}</td>
    <td class="opt"><span class="${(S.now - (pt?.t || 0)) > 15 * MIN ? "" : "muted"}">${fmtAgo(pt?.t)}</span><div class="na">IoT: ${st.iot.t.toLowerCase()}</div></td></tr>`;
 }
 ROUTES.overview = () => {
@@ -242,7 +246,7 @@ ROUTES.map = () => {
   return {
     title: "Map", after() {
       const open = (id, el) => { const p = pump(id), st = statusM(p), m = last(p.id)?.m || {}, h = healthM(p), box = $("#map").getBoundingClientRect(), r = el.getBoundingClientRect(); const pop = $("#mpop"); pop.className = "mpop"; pop.style.left = clamp(r.left - box.left - 130, 6, box.width - 290) + "px"; pop.style.top = (r.bottom - box.top + 8) + "px";
-        pop.innerHTML = `<div class="row" style="justify-content:space-between"><b>${esc(p.short)}</b>${pill(st.c, st.c === "off" ? "Offline" : st.label)}</div><p class="small muted" style="margin:4px 0 8px">${esc(st.c === "off" ? st.detail : st.detail)}</p><dl class="kv small"><dt>Flow</dt><dd>${has(p, "flow_lpm") ? fmtN(m.flow_lpm, 1) + " L/min" : "—"}</dd><dt>Water today</dt><dd>${fmtN(today(p).water, 1)} m³</dd><dt>Health</dt><dd>${h.score}/100${h.reasons[0] ? " — " + esc(h.reasons[0].txt) : ""}</dd></dl><div class="row" style="margin-top:10px"><button class="btn sm pri" data-go="#/pump/${p.id}">Open pump</button><button class="btn sm" data-mclose>Close</button></div>`;
+        pop.innerHTML = `<div class="row" style="justify-content:space-between"><b>${esc(p.short)}</b>${stCell(st)}</div><p class="small muted" style="margin:4px 0 8px">${esc(st.c === "off" ? st.detail : st.detail)}</p><dl class="kv small"><dt>Flow</dt><dd>${has(p, "flow_lpm") ? fmtN(m.flow_lpm, 1) + " L/min" : "—"}</dd><dt>Water today</dt><dd>${fmtN(today(p).water, 1)} m³</dd><dt>Health</dt><dd>${h.score}/100${h.reasons[0] ? " — " + esc(h.reasons[0].txt) : ""}</dd></dl><div class="row" style="margin-top:10px"><button class="btn sm pri" data-go="#/pump/${p.id}">Open pump</button><button class="btn sm" data-mclose>Close</button></div>`;
         pop.querySelector("[data-go]").onclick = e => go(e.currentTarget.dataset.go);
         pop.querySelector("[data-mclose]").onclick = () => { pop.className = ""; pop.innerHTML = ""; }; };
       document.querySelectorAll("[data-mk]").forEach(m => { m.onclick = () => open(m.dataset.mk, m); m.onkeydown = e => { if (e.key === "Enter") open(m.dataset.mk, m); }; });
