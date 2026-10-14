@@ -2,7 +2,7 @@
 import { $, CHANNELS, D, H, MIN, ROLES, S, SIM, START, TZ, arr, audit, byId, can, dev, dk, fmtDT, fmtDate, fmtDur, fmtN, fmtTime, has, hash, learnBaseline, lh, myPumps, pump, scoped, seedEntities, site, stepWorld, toast, uid, user, well, window_ } from './core.js';
 import { tl, tlk, tlx } from './i18n.js';
 import { daily, perfRatio, sumDays } from './intel.js';
-import { DRAWER, ROUTES, UI, VIEW, esc, healthM, pill, renderAll, renderShell, renderTop, setView, sev, updateClock } from './ui1.js';
+import { DRAWER, ROUTES, UI, VIEW, esc, hScrolling, healthM, pill, renderAll, renderShell, renderTop, setView, sev, updateClock } from './ui1.js';
 import { modalOpen } from './ui2.js';
 import { autoMaint, makeIncident } from './ui3.js';
 export const REPORTS = {
@@ -160,7 +160,7 @@ setInterval(() => {
   if (!S.session) return;
   updateClock();
   const ae = document.activeElement, typing = ae && /INPUT|SELECT|TEXTAREA/.test(ae.tagName) && $("#view")?.contains(ae);
-  if (VIEW.live && !modalOpen() && !typing) renderAll(true);
+  if (VIEW.live && !modalOpen() && !typing && !hScrolling()) renderAll(true);
   else { renderShell(); }
 }, 2000);
 

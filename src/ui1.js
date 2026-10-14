@@ -163,9 +163,15 @@ export function login(uid_) {
 export let VIEW = { live: true };
 export const ROUTES = {};
 let PREVR = null;
+// horizontal scrollers inside the view: keep their position across live re-renders, and hold live ticks while one is being scrolled
+const HSC = ".tw,.tabs,pre.code";
+let HSAT = 0;
+document.addEventListener("scroll", e => { if (e.target instanceof Element && e.target.matches(HSC)) HSAT = Date.now(); }, true);
+export const hScrolling = () => Date.now() - HSAT < 1500;
 export function renderAll(keepScroll) {
   if (!S.session) return;
   const v = $("#view"); const sc = v ? v.scrollTop : 0;
+  const hx = keepScroll && v ? [...v.querySelectorAll(HSC)].map(e => e.scrollLeft) : [];
   const [r, a, b] = location.hash.slice(2).split("/");
   const fn = ROUTES[r] || ROUTES.overview;
   renderShell();
@@ -173,7 +179,7 @@ export function renderAll(keepScroll) {
   VIEW = { live: out.live !== false, r };
   renderTop(out.title || "", out.crumb);
   if (out.after) out.after();
-  if (keepScroll && v) v.scrollTop = sc;
+  if (keepScroll && v) { v.scrollTop = sc; $("#view").querySelectorAll(HSC).forEach((e, i) => { if (hx[i]) e.scrollLeft = hx[i]; }); }
   if (VT) { const ph = $("#view .phead"); if (ph) ph.style.viewTransitionName = "pump-hero"; }
   const nv = $("#view"); if (nv && VIEW.r !== PREVR && !VT) { nv.classList.remove("route-in"); void nv.offsetWidth; nv.classList.add("route-in"); } PREVR = VIEW.r;
   settle(nv || document);

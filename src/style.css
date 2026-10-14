@@ -141,6 +141,15 @@ td .num{font-size:15px}
 .fleet td.r,.fleet td b{white-space:nowrap}
 @media (max-width:1500px){.fleet th,.fleet td{padding-left:6px;padding-right:6px}.fleet th{white-space:normal;vertical-align:bottom}}
 @media (max-width:900px){.fleet .opt{display:none}}
+/* devices table: short values never wrap, prose columns get a steady measure */
+.dv td{white-space:nowrap;padding-left:7px;padding-right:7px}
+.dv th{padding-left:7px;padding-right:7px;white-space:normal;vertical-align:bottom}
+.dv td.st .na{margin:3px 0 0 4px}
+.dv td.tx{white-space:normal;font-size:13.5px;line-height:1.35}
+.dv td.hwc{min-width:166px}.dv td.nw{min-width:128px}
+.dv td.tx .na{margin-top:2px;line-height:1.3}
+.dv .id .pl{display:table;margin-top:1px}
+.dv .crr{display:flex;align-items:center;gap:10px}.dv .crr .btn{margin-left:auto}
 
 /* status */
 .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px 2px 8px;font-size:13px;font-weight:500;white-space:nowrap}
@@ -350,6 +359,19 @@ details pre,.code{background:var(--paper);border:1px solid var(--line2);border-r
   .fleet td:nth-child(2){grid-column:1/-1}
   .fleet td.r{white-space:normal}
   .fleet td[data-l]::before{content:attr(data-l);display:block;font:600 11px var(--num);text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:2px}
+  .dv tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .dv td{min-width:0;white-space:normal;padding:0}
+  .dv td.id{grid-column:1/3;font-size:16px;line-height:1.3}
+  .dv td.id .pl{display:inline;margin-left:4px}
+  .dv td.st{grid-column:3;justify-self:end;align-self:start;text-align:right}
+  .dv td.st .na{margin:4px 2px 0 0}
+  .dv td.tx{grid-column:1/-1;min-width:0;font-size:14px}
+  .dv td.nw{margin-top:-4px}
+  .dv td.m{font-size:14px;padding:8px 0 0;border-top:1px solid var(--line2)}
+  .dv td.m:nth-child(n+8){border-top:0;padding-top:0}
+  .dv td[data-l]::before{content:attr(data-l);display:block;font:600 11px var(--num);text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:2px}
+  .dv td.cr{grid-column:1/-1;padding-top:10px;border-top:1px solid var(--line2)}
+  .dv .crr{justify-content:space-between}
 }
 
 /* ---------- nav sub-items (Pumps under Water & wells) ---------- */
