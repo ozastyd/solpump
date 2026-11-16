@@ -22,7 +22,7 @@ export const ID_UI1 = {
   "All alerts": "Semua peringatan",
   "All pumps are working normally.": "Semua pompa beroperasi normal.",
   "All sites": "Semua lokasi",
-  "Assalaam — The Modern Boarding School for Islam": "Assalaam — Pesantren Modern untuk Islam",
+  "LZIS Assalaam — Zakat, Infaq & Shodaqoh Institution": "LZIS Assalaam — Lembaga Zakat, Infaq & Shodaqoh",
   "Asset": "Aset",
   "Attention": "Perlu perhatian",
   "Audit log": "Log audit",

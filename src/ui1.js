@@ -114,7 +114,7 @@ export function renderShell() {
     [tl("Configure"), [["control", tl("Automation & schedules"), "control"], ["devices", tl("IoT devices"), "devices"], ...(can("audit") ? [["audit", tl("Audit log"), "audit"]] : []), ["settings", tl("Settings"), "settings"], ["blueprint", tl("System blueprint"), "blueprint"]]],
   ];
   const cur = (location.hash.slice(2).split("/")[0]) || "overview";
-  $("#side").innerHTML = `<div class="logo"><img src="${LOGO}" alt="${esc(tl("Assalaam — The Modern Boarding School for Islam"))}"></div>
+  $("#side").innerHTML = `<div class="logo"><img src="${LOGO}" alt="${esc(tl("LZIS Assalaam — Zakat, Infaq & Shodaqoh Institution"))}"></div>
     <div class="prod"><b>SolPump Operations</b>${tl("Solar water pumping, managed remotely")}</div>
     <label class="sr" style="position:absolute;left:-9999px" for="orgsel">${tl("Organization")}</label>
     <select id="orgsel" class="orgsel" ${orgs.length < 2 ? "disabled" : ""}>${orgs.map(o => `<option value="${o.id}" ${o.id === S.orgId ? "selected" : ""}>${esc(o.name)}</option>`).join("")}</select>
@@ -145,7 +145,7 @@ export function updateClock() { const c = $("#clk"); if (c) c.textContent = `${D
 
 /* ---------- auth (demo sign-in) ---------- */
 export function renderLogin() {
-  document.body.innerHTML = `<div class="login"><div class="l"><img src="${LOGO}" alt="Assalaam"><h1>${tl("Know which pumps need you today.")}</h1><p>${tl("SolPump watches every solar pump, well and tank, and tells you in plain words what's wrong and what to do about it.")}</p></div>
+  document.body.innerHTML = `<div class="login"><div class="l"><img src="${LOGO}" alt="LZIS Assalaam"><h1>${tl("Know which pumps need you today.")}</h1><p>${tl("SolPump watches every solar pump, well and tank, and tells you in plain words what's wrong and what to do about it.")}</p></div>
   <div class="r"><div class="login-lang">${langSel()}</div><h2>${tl("Sign in")}</h2><p class="muted small">${tl("Demo accounts — each role sees a different slice of the system. In production this is email + password or SSO with per-organization accounts.")}</p>
   ${S.users.map(u => `<button class="acct" data-u="${u.id}"><span class="av">${u.name.split(" ").map(x => x[0]).join("")}</span><span><b>${esc(u.name)}</b><br><span class="small muted">${esc(tlx(ROLES[u.role].label))} · ${esc(byId(S.orgs, u.org).name)}${u.scope ? " · " + tl("Site A only") : ""}</span></span></button>`).join("")}
   <div id="toasts" class="toasts"></div></div></div>`;
