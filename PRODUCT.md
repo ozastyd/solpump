@@ -21,7 +21,7 @@ A fully self-contained operations console: 30 days of plausible simulated histor
 ## Operating Context
 
 - Public deployment at https://solpump-gamma.vercel.app (Vercel, hash routing); local dev via `npm run dev` (Vite HMR).
-- Multi-tenant demo: organization scoping (`S.orgId`), role permissions (`can()`), clock fixed to UTC+7 (WIB).
+- One institution (Assalaam); organization scoping (`S.orgId`) is kept in the code, role permissions (`can()`), clock fixed to UTC+7 (WIB).
 - Sign-in is a demo gate; any seeded account works.
 
 ## Capabilities and Constraints

@@ -88,7 +88,7 @@ re-exports, `export { a as b }`) requires extending the strip logic in `build.sh
 - Main loop (`ui4.js`, 2 s `setInterval`): advances the simulated clock (`S.speed` 1×/10×, pause) and
   re-renders the current route unless a modal is open, the user is typing, or `live: false`.
 - State is in-memory only: reload = fresh seed. No fetch/persistence exists anywhere. The one exception is the UI language (`solpump.lang` in localStorage, try/catch-wrapped, see i18n below).
-- Multi-tenant demo: `S.orgId`, permissions via `can()`, list scoping via `scoped()`. Gate new screens
+- Single institution (LZIS/Yayasan Assalaam, `ORG-ASL`), but tenant scoping is kept: `S.orgId`, permissions via `can()`, list scoping via `scoped()`. Gate new screens
   inside the route itself (`if (!can("x")) …`).
 - A metric the pump lacks renders "no sensor" (`nos()`) — never 0.
 

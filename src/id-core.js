@@ -40,8 +40,8 @@ export const ID_CORE = {
   /* stored-only exact strings (tlx) */
   "Manual mode — waiting for a start command.": "Mode manual — menunggu perintah mulai.", "Night — no solar power.": "Malam — tidak ada daya surya.",
   "Running on remote start command.": "Berjalan atas perintah mulai jarak jauh.", "Running on schedule with solar power.": "Berjalan sesuai jadwal dengan daya surya.",
-  "Tower tank A1": "Tangki menara A1", "Hilltop reservoir W1": "Reservoir bukit W1", "Village tank P1": "Tangki desa P1", "Dormitory tank A2": "Tangki asrama A2", "Irrigation reservoir B1": "Reservoir irigasi B1", "Village reservoir": "Reservoir desa",
-  "Site A — Main campus": "Site A — Kampus utama", "Site B — Agricultural estate": "Site B — Perkebunan", "Tirtomulyo village": "Desa Tirtomulyo",
+  "Tower tank A1": "Tangki menara A1", "Hilltop reservoir W1": "Reservoir bukit W1", "Village tank P1": "Tangki desa P1", "Dormitory tank A2": "Tangki asrama A2", "Irrigation reservoir B1": "Reservoir irigasi B1",
+  "Site A — Main campus": "Site A — Kampus utama", "Site B — Agricultural estate": "Site B — Perkebunan",
 };
 /* Patterns for stored runtime strings translated by tlx(): [regex, replacement with $1…] */
 const _esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
