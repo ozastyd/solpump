@@ -16,7 +16,7 @@ SolPump Operations is a single-file demo webapp — a solar pump fleet dashboard
 
 ## Positioning
 
-A fully self-contained operations console: 30 days of plausible simulated history backfilled on load, real interactions (acknowledge, command, schedule), and zero runtime dependencies. The demo stands out by combining single-file portability (open dist/index.html from disk) with operational depth — a combination generic dashboard demos cannot truthfully copy.
+A fully self-contained operations console: 30 days of plausible simulated history backfilled on load, real interactions (acknowledge, command, schedule), and a single runtime dependency (Leaflet, for the maps). The demo stands out by combining single-file portability (open dist/index.html from disk) with operational depth — a combination generic dashboard demos cannot truthfully copy.
 
 ## Operating Context
 
@@ -26,7 +26,7 @@ A fully self-contained operations console: 30 days of plausible simulated histor
 
 ## Capabilities and Constraints
 
-- Runtime: plain ES modules under `src/`, bundled by Vite into one self-contained `dist/index.html`. No runtime dependencies.
+- Runtime: plain ES modules under `src/`, bundled by Vite into one self-contained `dist/index.html`. One runtime dependency: Leaflet, bundled in, for the OpenStreetMap maps.
 - State: in-memory only — reload = fresh seed. No localStorage/fetch/persistence.
 - Data: simulated; a metric a pump lacks renders "no sensor" (`nos()`), never 0.
 - User-confirmed constraints: keep the Vite singlefile build, dependency-free runtime, simulated-only data, and hash routing.

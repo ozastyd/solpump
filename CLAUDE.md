@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-SolPump Operations: a single-file demo webapp (solar pump fleet dashboard, simulated in-memory data, hash routing). Plain ES modules in `src/`, bundled by Vite into one self-contained `dist/index.html`. No runtime dependencies, no fetch/localStorage, no unit-test framework.
+SolPump Operations: a single-file demo webapp (solar pump fleet dashboard, simulated in-memory data, hash routing). Plain ES modules in `src/`, bundled by Vite into one self-contained `dist/index.html`. One runtime dependency, Leaflet (maps; bundled in, exposed as global `L` by `main.js`/`build.sh`), no fetch/localStorage, no unit-test framework.
 
 ## Commands
 

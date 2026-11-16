@@ -17,14 +17,18 @@ def classic(f):
     return '\n'.join(re.sub(r'^export ', '', l).replace('; export ', '; ') for l in lines)
 logo=base64.b64encode(open('assets/logo.png','rb').read()).decode()
 css=open('src/style.css', encoding=ENC).read()
+lcss=open('node_modules/leaflet/dist/leaflet.css', encoding=ENC).read()
+ljs=open('node_modules/leaflet/dist/leaflet.js', encoding=ENC).read()
 js="\n".join(classic(f) for f in ['id-core.js','id-intel.js','id-ui1.js','id-ui2.js','id-ui3.js','id-ui4.js','i18n.js','core.js','intel.js','motion.js','ui1.js','ui2.js','ui3.js','ui4.js'])
 html=f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SolPump Operations — Assalaam</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&family=Barlow+Semi-Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>{lcss}</style>
 <style>{css}</style></head>
 <body><div style="padding:40px;font:16px system-ui">Loading 30 days of simulated field data…</div>
+<script>{ljs}</script>
 <script>
 const LOGO="data:image/png;base64,{logo}";
 {js}

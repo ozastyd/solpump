@@ -19,7 +19,7 @@ const eslint = new ESLint({
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: { ...globals.browser, LOGO: 'readonly' },
+      globals: { ...globals.browser, LOGO: 'readonly', L: 'readonly' },
     },
     rules: { 'no-undef': 'error' },
   }],
@@ -146,7 +146,7 @@ const eslintBare = new ESLint({
   overrideConfigFile: true,
   overrideConfig: [{
     files: ['src/**/*.js'],
-    languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { LOGO: 'readonly' } },
+    languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { LOGO: 'readonly', L: 'readonly' } },
     rules: { 'no-undef': 'error' },
   }],
 });

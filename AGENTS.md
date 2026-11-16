@@ -4,8 +4,8 @@
 
 SolPump Operations — a single-file demo webapp (solar pump fleet dashboard, simulated field data).
 No framework, no tests, no CI. Runtime code is plain ES modules under `src/`, bundled by
-Vite into one self-contained `dist/index.html`. Dependency-free means no *runtime* deps; devDependencies
-(vite, jsdom, eslint…) are allowed. Two build paths exist — Vite is primary, `build.sh` is the classic
+Vite into one self-contained `dist/index.html`. The only *runtime* dep is Leaflet (maps), bundled into the file and exposed
+as the global `L` (`main.js` for Vite, inlined by `build.sh`); devDependencies (vite, jsdom, eslint…) are allowed. Two build paths exist — Vite is primary, `build.sh` is the classic
 fallback (same artifact shape, same behavior).
 
 ## Commands
@@ -21,8 +21,8 @@ sh build.sh        # classic single-file build (concatenated globals) — option
 ```
 
 - Preview by opening `dist/index.html` directly (`file://` works — no server, no fetch).
-  External requests: Google Fonts (Barlow; offline falls back to system fonts) and the map basemap, plain
-  `<image>` tiles from `tile.openstreetmap.org` (overview + `#/map`, `mapSvg` in `ui1.js`, attribution required). No tiles (offline, or OSM refusing a
+  External requests: Google Fonts (Barlow; offline falls back to system fonts) and the map basemap, Leaflet
+  tiles from `tile.openstreetmap.org` (overview + `#/map`, `mountMap` in `ui1.js`, attribution required). No tiles (offline, or OSM refusing a
   `file://` page with no Referer) leaves a blank background; markers, clusters and popups still work.
 - `dist/index.html` is **generated**. Never hand-edit it — the next build overwrites it entirely.
 - Freshness: rebuild whenever `src/` changes; quickest sanity is `npm run check`.
