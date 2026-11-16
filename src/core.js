@@ -54,12 +54,16 @@ export function seedEntities() {
   S.sites.push(
     { id: "S-A", org: "ORG-ASL", name: "Site A — Main campus", lat: -7.5551, lng: 110.7642, elev: 112, irr: true },
     { id: "S-B", org: "ORG-ASL", name: "Site B — Agricultural estate", lat: -7.5712, lng: 110.7818, elev: 104, irr: true },
+    { id: "S-W", org: "ORG-ASL", name: "Pracimantoro — Wonogiri", lat: -8.0572, lng: 110.8022, elev: 290, irr: false },
+    { id: "S-P", org: "ORG-ASL", name: "Ngrayun — Ponorogo", lat: -8.0741, lng: 111.4481, elev: 610, irr: true },
     { id: "S-T", org: "ORG-TM", name: "Tirtomulyo village", lat: -7.6420, lng: 110.8210, elev: 131, irr: false },
   );
   S.tanks.push(
     { id: "TK-A1", org: "ORG-ASL", site: "S-A", name: "Tower tank A1", cap: 60, demand: 0.7 },
     { id: "TK-A2", org: "ORG-ASL", site: "S-A", name: "Dormitory tank A2", cap: 25, demand: 0.22 },
     { id: "TK-B1", org: "ORG-ASL", site: "S-B", name: "Irrigation reservoir B1", cap: 80, demand: 0.72 },
+    { id: "TK-W1", org: "ORG-ASL", site: "S-W", name: "Hilltop reservoir W1", cap: 40, demand: 0.5 },
+    { id: "TK-P1", org: "ORG-ASL", site: "S-P", name: "Village tank P1", cap: 50, demand: 0.6 },
     { id: "TK-T1", org: "ORG-TM", site: "S-T", name: "Village reservoir", cap: 50, demand: 0.75 },
   );
   const P = (o) => {
@@ -84,6 +88,11 @@ export function seedEntities() {
   P({ id: "PUMP-03", n: "03", org: "ORG-ASL", site: "S-A", tank: "TK-A2", lat: -7.5528, lng: 110.7671, elev: 115, wd: 48, pd: 40, st: 22.0, ms: 39.5, dd: 0.37, tau: 55, kw: 1.8, P: 1100, Q: 55, Hd: 55, V: 220, rpm: 2850, type: tlk("Helical rotor (positive displacement)"), ctl: "Lorentz PSk3-3", mfr: "Lorentz", model: "PS2-1800 HR-14", sn: "LZ-1803-77302", inst: "2023-07-01", war: "2028-07-01", ml: -102, mi: 90, hw: "ESP32 + RS485", ad: "mqtt-json", net: "Wi-Fi (MQTT)", rssi: -71, sensors: all, scen: "dryrun" });
   P({ id: "PUMP-04", n: "04", org: "ORG-ASL", site: "S-B", tank: "TK-B1", lat: -7.5701, lng: 110.7796, elev: 103, wd: 100, pd: 70, st: 20.4, ms: 60, dd: 0.13, tau: 40, kw: 4.5, P: 3000, Q: 120, Hd: 80, V: 380, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Franklin SubDrive Solar", mfr: "Franklin Electric", model: "SolarPAK 4400", sn: "FE-SP4-20391", inst: "2024-01-20", war: "2029-01-20", ml: -35, hw: tlk("LoRaWAN node (RS485)"), ad: "lorawan", net: "LoRaWAN → gateway (4G)", rssi: -112, sensors: without("well_level_m", "rpm"), scen: "lowsolar_hot" });
   P({ id: "PUMP-05", n: "05", org: "ORG-ASL", site: "S-B", tank: "TK-B1", lat: -7.5730, lng: 110.7840, elev: 105, wd: 95, pd: 66, st: 23.0, ms: 56, dd: 0.15, tau: 50, kw: 3.3, P: 2200, Q: 90, Hd: 75, V: 310, rpm: 3000, type: tlk("Submersible centrifugal (multistage)"), ctl: "Lorentz PSk3-5", mfr: "Lorentz", model: "PS2-4000 C-SJ8-15", sn: "LZ-2204-90551", inst: "2024-01-22", war: "2029-01-22", ml: -70, mi: 90, hw: "ESP32-S3 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", rssi: -95, sensors: without("pressure_bar"), scen: "offline_declining" });
+  // remote sites: deep karst wells in dry Pracimantoro (Wonogiri), highland wells in Ngrayun (Ponorogo)
+  P({ id: "PUMP-06", n: "06", org: "ORG-ASL", site: "S-W", tank: "TK-W1", lat: -8.0561, lng: 110.8004, elev: 292, wd: 140, pd: 112, st: 68, ms: 100, dd: 0.2, tau: 45, kw: 3.3, P: 2200, Q: 48, Hd: 125, V: 310, rpm: 3000, type: tlk("Submersible centrifugal (multistage)"), ctl: "Lorentz PSk3-5", mfr: "Lorentz", model: "PS2-4000 C-SJ5-25", sn: "LZ-2405-31877", inst: "2025-02-14", war: "2030-02-14", ml: -30, hw: "ESP32-S3 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", rssi: -109, sensors: without("motor_temp_c"), scen: "normal", pipe: 40, len: 620 });
+  P({ id: "PUMP-07", n: "07", org: "ORG-ASL", site: "S-W", tank: "TK-W1", lat: -8.0584, lng: 110.8041, elev: 288, wd: 125, pd: 100, st: 61, ms: 90, dd: 0.22, tau: 48, kw: 2.4, P: 1500, Q: 38, Hd: 110, V: 300, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 3A-10", sn: "GF-SQF-70412", inst: "2025-02-16", war: "2029-02-16", ml: -85, hw: tlk("LoRaWAN node (RS485)"), ad: "lorawan", net: "LoRaWAN → gateway (4G)", rssi: -117, sensors: without("well_level_m", "rpm"), scen: "lowflow", pipe: 40, len: 480 });
+  P({ id: "PUMP-08", n: "08", org: "ORG-ASL", site: "S-P", tank: "TK-P1", lat: -8.0731, lng: 111.4462, elev: 614, wd: 85, pd: 58, st: 24, ms: 50, dd: 0.18, tau: 40, kw: 2.4, P: 1500, Q: 65, Hd: 70, V: 300, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-70988", inst: "2025-06-03", war: "2030-06-03", ml: -50, hw: "ESP32 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", rssi: -101, sensors: without("irradiance_wm2", "pressure_bar"), scen: "normal" });
+  P({ id: "PUMP-09", n: "09", org: "ORG-ASL", site: "S-P", tank: "TK-P1", lat: -8.0752, lng: 111.4501, elev: 606, wd: 90, pd: 60, st: 26, ms: 52, dd: 0.17, tau: 42, kw: 3.3, P: 2200, Q: 80, Hd: 75, V: 310, rpm: 3000, type: tlk("Submersible centrifugal (multistage)"), ctl: "Lorentz PSk3-5", mfr: "Lorentz", model: "PS2-4000 C-SJ8-15", sn: "LZ-2506-12044", inst: "2025-06-05", war: "2030-06-05", ml: -50, hw: "ESP32-S3 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", rssi: -106, sensors: all, scen: "normal" });
   P({ id: "PUMP-T1", n: "T1", org: "ORG-TM", site: "S-T", tank: "TK-T1", lat: -7.6412, lng: 110.8195, elev: 132, wd: 80, pd: 55, st: 19.5, ms: 46, dd: 0.17, tau: 40, kw: 2.4, P: 1500, Q: 70, Hd: 60, V: 300, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-61002", inst: "2025-05-02", war: "2030-05-02", ml: -20, hw: "ESP32 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", sensors: without("irradiance_wm2", "motor_temp_c", "pressure_bar"), scen: "normal" });
   P({ id: "PUMP-T2", n: "T2", org: "ORG-TM", site: "S-T", tank: "TK-T1", lat: -7.6431, lng: 110.8226, elev: 130, wd: 75, pd: 52, st: 21.0, ms: 44, dd: 0.18, tau: 42, kw: 2.4, P: 1500, Q: 70, Hd: 60, V: 300, rpm: 2900, type: tlk("Submersible centrifugal (multistage)"), ctl: "Grundfos CU 200", mfr: "Grundfos", model: "SQFlex 5A-7", sn: "GF-SQF-61003", inst: "2025-05-02", war: "2030-05-02", ml: -20, hw: "ESP32 + RS485", ad: "mqtt-json", net: "4G/LTE (MQTT)", sensors: without("irradiance_wm2", "motor_temp_c", "pressure_bar", "well_level_m"), scen: "normal" });
 
@@ -96,7 +105,8 @@ export function seedEntities() {
   }
   const sch = (pump, w) => S.schedules.push({ id: uid("SCH"), org: org(pump).id, pump, windows: w, respect: [tlk("Well protection"), tlk("Tank level"), tlk("Solar availability"), tlk("Fault state"), tlk("Manual override")] });
   sch("PUMP-01", [["06:00", "17:30"]]); sch("PUMP-02", [["06:00", "17:30"]]); sch("PUMP-03", [["06:30", "17:00"]]);
-  sch("PUMP-04", [["06:00", "17:30"]]); sch("PUMP-05", [["06:00", "17:30"]]); sch("PUMP-T1", [["06:30", "16:30"]]); sch("PUMP-T2", [["06:30", "16:30"]]);
+  sch("PUMP-04", [["06:00", "17:30"]]); sch("PUMP-05", [["06:00", "17:30"]]); sch("PUMP-T1", [["06:30", "16:30"]]);
+  sch("PUMP-06", [["06:00", "17:00"]]); sch("PUMP-07", [["06:00", "17:00"]]); sch("PUMP-08", [["06:30", "16:30"]]); sch("PUMP-09", [["06:30", "16:30"]]); sch("PUMP-T2", [["06:30", "16:30"]]);
   const A = (o) => S.automations.push(Object.assign({ id: uid("AUT"), enabled: true, fired: 0, createdBy: tlk("System template") }, o));
   for (const og of ["ORG-ASL", "ORG-TM"]) {
     A({ org: og, name: tlk("Stop when the tank is nearly full"), when: [{ m: "tank_level_pct", op: ">", v: 90 }], then: "stop", release: { m: "tank_level_pct", op: "<", v: 80 }, scope: "all" });

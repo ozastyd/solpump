@@ -41,7 +41,6 @@ a{color:var(--brandd)}
 .side .logo img{width:100%;max-width:150px;height:auto;display:block;margin:0 auto;background:var(--logobg);border-radius:var(--r2);padding:6px;box-sizing:border-box}
 .side .prod{padding:0 20px 14px;font-size:13px;line-height:1.4;color:var(--ink3)}
 .side .prod b{color:var(--ink);font-weight:600;font-size:15px;display:block}
-.orgsel{margin:0 14px 8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:0 10px;height:40px;color:var(--ink);width:calc(100% - 28px);font-weight:500}
 .nav{padding:4px 12px 14px;display:flex;flex-direction:column;gap:2px}
 .nav .grp{font-size:13px;color:var(--ink3);padding:14px 10px 4px}
 .nav a{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:var(--r2);color:var(--ink2);text-decoration:none;font-weight:500}

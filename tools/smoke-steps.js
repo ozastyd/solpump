@@ -66,7 +66,7 @@
   } else results.push({ name: 'incident detail (none seeded — skipped)', ok: true, detail: '' });
 
   await setHash('#/map');
-  if (!qs('[data-mk]') && qs('[data-cl]')) { tap(qs('[data-cl]')); for (let i = 0; i < 30 && !qs('[data-mk]'); i++) await sleep(100); } // zoomed out: sites are clustered; wait out the zoom animation
+  for (let k = 0; k < 5 && !qs('[data-mk]') && qs('[data-cl]'); k++) { tap(qs('[data-cl]')); for (let i = 0; i < 15 && !qs('[data-mk]'); i++) await sleep(100); } // zoomed out: pumps are grouped; click in until single markers show
   step('map marker opens popup', () => {
     const mk = qs('[data-mk]');
     if (!mk) throw new Error('no markers');

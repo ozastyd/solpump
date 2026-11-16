@@ -106,7 +106,6 @@ export function navCounts() {
   return { alerts: al.length, crit: al.some(a => a.sev === "critical"), inc: scoped(S.incidents).filter(i => !["Resolved", "Closed"].includes(i.status)).length, maint: scoped(S.tasks).filter(t => t.status !== "Done" && (S.session.role !== "tech" || t.assignee === S.session.userId)).length };
 }
 export function renderShell() {
-  const u = user(S.session.userId), orgs = S.orgs.filter(o => S.users.some(x => x.org === o.id && x.name === u.name) || o.id === u.org);
   const c = navCounts();
   const links = [
     [tl("Operate"), [["overview", tl("Fleet overview"), "overview"], ["map", tl("Map"), "map"], ["alerts", tl("Alerts"), "alerts", c.alerts ? `<span class="cnt ${c.crit ? "" : "w"}">${c.alerts}</span>` : ""], ["incidents", tl("Incidents"), "incidents", c.inc ? `<span class="cnt w">${c.inc}</span>` : ""], ["maintenance", S.session.role === "tech" ? tl("My tasks") : tl("Maintenance"), "maint", c.maint ? `<span class="cnt w">${c.maint}</span>` : ""]]],
@@ -116,11 +115,8 @@ export function renderShell() {
   const cur = (location.hash.slice(2).split("/")[0]) || "overview";
   $("#side").innerHTML = `<div class="logo"><img src="${LOGO}" alt="${esc(tl("LZIS Assalaam — Zakat, Infaq & Shodaqoh Institution"))}"></div>
     <div class="prod"><b>SolPump Operations</b>${tl("Solar water pumping, managed remotely")}</div>
-    <label class="sr" style="position:absolute;left:-9999px" for="orgsel">${tl("Organization")}</label>
-    <select id="orgsel" class="orgsel" ${orgs.length < 2 ? "disabled" : ""}>${orgs.map(o => `<option value="${o.id}" ${o.id === S.orgId ? "selected" : ""}>${esc(o.name)}</option>`).join("")}</select>
     <nav class="nav">${links.map(([g, ls]) => `<div class="grp">${g}</div>` + ls.map(([h, l, i, x, sub]) => `<a href="#/${h}" class="${sub ? "sub " : ""}${cur === h || (cur === "pump" && h === "pumps") || (cur === "incident" && h === "incidents") ? "on" : ""}">${svgI(i)}<span>${l}</span>${x || ""}</a>`).join("")).join("")}</nav>
-    <div class="foot">${tl("Demo data — simulated telemetry. No hardware is connected.")}<br>${tl("Tenant: {name}", { name: esc(byId(S.orgs, S.orgId).name) })}</div>`;
-  $("#orgsel").onchange = e => { S.orgId = e.target.value; audit(S.session.userId, "Switched organization", null, null, S.orgId); go("#/overview"); renderAll(); };
+    <div class="foot">${tl("Demo data — simulated telemetry. No hardware is connected.")}</div>`;
 }
 export function renderTop(title, crumb) {
   const u = user(S.session.userId), unread = scoped(S.notifications).filter(n => !n.read).length;
@@ -304,19 +300,20 @@ export function mountMap(kind, ps, fit) {
 function drawMap(kind) {
   const m = LM[kind], { map, ps } = m, z = map.getZoom(), pg = kind === "pg", want = {}, lines = [];
   const add = (k, ll, html, o = {}) => { want[k] = { ll, html, ...o }; };
-  for (const sid of new Set(ps.map(p => p.site))) {
-    const sp = ps.filter(p => p.site === sid), q = sp.map(p => map.project([p.lat, p.lng], z)), cx = q.reduce((a, b) => a + b.x, 0) / q.length, cy = q.reduce((a, b) => a + b.y, 0) / q.length, nm = site(sid).name;
-    if (sp.length > 1 && Math.max(...q.map(a => Math.hypot(a.x - cx, a.y - cy))) < 36) {
-      const sts = sp.map(p => statusM(p).c), w = WORST.find(c => sts.includes(c));
-      add("cl:" + sid, map.unproject(L.point(cx, cy), z), `<div class="pcl ${w}" data-cl="${sid}"><i>${sp.length}</i><b>${esc(nm.split(" — ")[0])}</b></div>`, { title: tl("{site}: {n} pumps. Zoom in", { site: nm, n: sp.length }), sp });
-      continue;
-    }
-    for (const p of sp) { const st = statusM(p); add("mk:" + p.id, [p.lat, p.lng], `<div class="pm ${st.c}" data-mk="${p.id}"><i></i><b>${esc(p.short)}</b></div>`, { title: `${p.short}: ${tlx(ST_TXT[st.c])}`, p }); }
-    if (pg) { const tks = {}; sp.forEach((p, i) => (tks[p.tank] = tks[p.tank] || []).push(q[i])); for (const [tid, l] of Object.entries(tks)) {
-      const tx = l.reduce((a, b) => a + b.x, 0) / l.length + 34, ty = l.reduce((a, b) => a + b.y, 0) / l.length - 38, tll = map.unproject(L.point(tx, ty), z), tk = byId(S.tanks, tid), pct = Math.round(SIM[S.pumps.find(p => p.tank === tid).id].tankPct || 0);
-      add("tk:" + tid, tll, `<div class="ptk"><i><s style="height:${pct}%"></s></i><b>${pct}%</b></div>`, { title: `${tlx(tk.name)} · ${pct}%`, still: 1 });
-      for (const a of l) lines.push([map.unproject(a, z), tll]); } }
+  // greedy screen-space grouping: pumps (and groups) closer than CLD px merge into one count marker, whatever their site
+  const CLD = 64, gs = []; for (const p of ps) { const q = map.project([p.lat, p.lng], z), g = gs.find(g => Math.hypot(g.x - q.x, g.y - q.y) < CLD); if (g) { g.m.push({ p, q }); g.x = g.m.reduce((a, b) => a + b.q.x, 0) / g.m.length; g.y = g.m.reduce((a, b) => a + b.q.y, 0) / g.m.length; } else gs.push({ m: [{ p, q }], x: q.x, y: q.y }); }
+  for (let i = 0; i < gs.length; i++) for (let j = gs.length - 1; j > i; j--) if (Math.hypot(gs[i].x - gs[j].x, gs[i].y - gs[j].y) < CLD) { gs[i].m.push(...gs.splice(j, 1)[0].m); gs[i].x = gs[i].m.reduce((a, b) => a + b.q.x, 0) / gs[i].m.length; gs[i].y = gs[i].m.reduce((a, b) => a + b.q.y, 0) / gs[i].m.length; }
+  const solo = [];
+  for (const g of gs) {
+    if (g.m.length === 1) { solo.push(g.m[0]); continue; }
+    const sp = g.m.map(e => e.p), sids = [...new Set(sp.map(p => p.site))], nm = sids.map(x => site(x).name.split(" — ")[0]).join(" · "), sts = sp.map(p => statusM(p).c), w = WORST.find(c => sts.includes(c));
+    add("cl:" + sp.map(p => p.id).sort().join(), map.unproject(L.point(g.x, g.y), z), `<div class="pcl ${w}" data-cl="${sids.join()}"><i>${sp.length}</i><b>${esc(nm)}</b></div>`, { title: tl("{site}: {n} pumps. Zoom in", { site: sids.length > 1 ? nm : site(sids[0]).name, n: sp.length }), sp });
   }
+  for (const { p } of solo) { const st = statusM(p); add("mk:" + p.id, [p.lat, p.lng], `<div class="pm ${st.c}" data-mk="${p.id}"><i></i><b>${esc(p.short)}</b></div>`, { title: `${p.short}: ${tlx(ST_TXT[st.c])}`, p }); }
+  if (pg) { const tks = {}; for (const { p, q } of solo) (tks[p.tank] = tks[p.tank] || []).push(q); for (const [tid, l] of Object.entries(tks)) {
+    const tx = l.reduce((a, b) => a + b.x, 0) / l.length + 34, ty = l.reduce((a, b) => a + b.y, 0) / l.length - 38, tll = map.unproject(L.point(tx, ty), z), tk = byId(S.tanks, tid), pct = Math.round(SIM[S.pumps.find(p => p.tank === tid).id].tankPct || 0);
+    add("tk:" + tid, tll, `<div class="ptk"><i><s style="height:${pct}%"></s></i><b>${pct}%</b></div>`, { title: `${tlx(tk.name)} · ${pct}%`, still: 1 });
+    for (const a of l) lines.push([map.unproject(a, z), tll]); } }
   for (const [k, o] of Object.entries(m.on)) if (!want[k]) { map.removeLayer(o.l); delete m.on[k]; }
   for (const [k, w] of Object.entries(want)) {
     let o = m.on[k];
