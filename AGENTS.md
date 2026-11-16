@@ -21,7 +21,9 @@ sh build.sh        # classic single-file build (concatenated globals) — option
 ```
 
 - Preview by opening `dist/index.html` directly (`file://` works — no server, no fetch).
-  The only external request is Google Fonts (Barlow); offline falls back to system fonts.
+  External requests: Google Fonts (Barlow; offline falls back to system fonts) and the map basemap, plain
+  `<image>` tiles from `tile.openstreetmap.org` (overview + `#/map`, `mapSvg` in `ui1.js`, attribution required). No tiles (offline, or OSM refusing a
+  `file://` page with no Referer) leaves a blank background; markers, clusters and popups still work.
 - `dist/index.html` is **generated**. Never hand-edit it — the next build overwrites it entirely.
 - Freshness: rebuild whenever `src/` changes; quickest sanity is `npm run check`.
 - Deploy: `npm run check` → `git add -A && git commit -m "…"` → `git push`. Vercel builds

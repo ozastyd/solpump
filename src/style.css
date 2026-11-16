@@ -3,7 +3,7 @@
   --paper:#F3F6F7; --card:#FFFFFF; --ink:#10201E; --ink2:#3F5350; --ink3:#5E716E; --line:#E2E8EA; --line2:#EDF1F2;
   --ok:#157A40; --okbg:#E3F4EA; --warn:#8A5D00; --warnbg:#FFF1D0; --crit:#B02E24; --critbg:#FDE7E4; --off:#5E6A65; --offbg:#E9EDEB;
   --water:#1456C8; --waterbg:#E4EDFB; --solar:#F2B33D; --solarink:#7A4F00; --power:#7A4FB5; --well:#0A7F77; --press:#B5523B;
-  --focus:#0A7F77; --onbrand:#FFFFFF; --float:0 10px 28px rgb(16 32 30 / .12); --navtxt:#C9D6D3; --logobg:transparent;
+  --focus:#0A7F77; --onbrand:#FFFFFF; --float:0 10px 28px rgb(16 32 30 / .12); --navtxt:#C9D6D3; --logobg:transparent; --tilef:saturate(.3) brightness(1.03);
   --r1:6px; --r2:10px; --r3:16px; --r4:20px;
   --m-instant:90ms; --m-quick:160ms; --m-base:280ms; --m-large:420ms;
   --e-out:cubic-bezier(.2,.8,.2,1); --e-in:cubic-bezier(.4,0,1,1); --e-inout:cubic-bezier(.4,0,.2,1);
@@ -15,14 +15,14 @@
   --paper:#1F2630; --card:#2A323F; --ink:#E7ECF1; --ink2:#C2CCD6; --ink3:#9AA7B5; --line:#434D5E; --line2:#384253;
   --okbg:#25382E; --warnbg:#3A3220; --critbg:#3D2528; --offbg:#343D4C; --deep:#151B23; --deep2:#222A36;
   --ok:#8CCB9B; --warn:#E6B65C; --crit:#E8858B; --off:#AEB9C6; --water:#7EA6E8; --waterbg:#343D4C; --solar:#F2C260; --solarink:#F2C260; --power:#B79BE0; --well:#5CC8BC; --press:#E08A72;
-  --brand:#5CC8BC; --brandd:#8FE0D6; --brandbg:#1F3A3A; --focus:#5CC8BC; --onbrand:#10201E; --float:0 10px 28px rgb(0 0 0 / .35); --navtxt:#C9D6D3; --logobg:#FFFFFF;
+  --brand:#5CC8BC; --brandd:#8FE0D6; --brandbg:#1F3A3A; --focus:#5CC8BC; --onbrand:#10201E; --float:0 10px 28px rgb(0 0 0 / .35); --navtxt:#C9D6D3; --logobg:#FFFFFF; --tilef:invert(1) hue-rotate(180deg) brightness(.92) contrast(.85) saturate(.3);
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --paper:#1F2630; --card:#2A323F; --ink:#E7ECF1; --ink2:#C2CCD6; --ink3:#9AA7B5; --line:#434D5E; --line2:#384253;
   --okbg:#25382E; --warnbg:#3A3220; --critbg:#3D2528; --offbg:#343D4C; --deep:#151B23; --deep2:#222A36;
   --ok:#8CCB9B; --warn:#E6B65C; --crit:#E8858B; --off:#AEB9C6; --water:#7EA6E8; --waterbg:#343D4C; --solar:#F2C260; --solarink:#F2C260; --power:#B79BE0; --well:#5CC8BC; --press:#E08A72;
-  --brand:#5CC8BC; --brandd:#8FE0D6; --brandbg:#1F3A3A; --focus:#5CC8BC; --onbrand:#10201E; --float:0 10px 28px rgb(0 0 0 / .35); --navtxt:#C9D6D3; --logobg:#FFFFFF;
+  --brand:#5CC8BC; --brandd:#8FE0D6; --brandbg:#1F3A3A; --focus:#5CC8BC; --onbrand:#10201E; --float:0 10px 28px rgb(0 0 0 / .35); --navtxt:#C9D6D3; --logobg:#FFFFFF; --tilef:invert(1) hue-rotate(180deg) brightness(.92) contrast(.85) saturate(.3);
   color-scheme:dark;
 }
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -241,6 +241,15 @@ details pre,.code{background:var(--paper);border:1px solid var(--line2);border-r
 /* map */
 .map{position:relative;background:var(--card)}
 .map svg{display:block;width:100%;height:auto}
+.map .tl{filter:var(--tilef)}
+.map.pan svg{touch-action:none;cursor:grab}.map.pan svg.drag{cursor:grabbing}
+.ovm .map svg{overflow:visible}
+.mattr{position:absolute;right:0;bottom:0;z-index:2;font-size:11px;line-height:1.4;padding:2px 7px;color:var(--ink2);background:color-mix(in srgb,var(--card) 88%,transparent);border-top-left-radius:6px}
+.mattr a{color:inherit}
+.mapz{position:absolute;top:12px;right:12px;z-index:3;display:flex;flex-direction:column;gap:6px}
+.mapz .btn{width:40px;height:40px;padding:0;justify-content:center;font-size:20px;line-height:1;box-shadow:var(--float)}
+.mapall{position:absolute;top:12px;left:12px;z-index:3;box-shadow:var(--float)}
+.mapbar{padding:12px 16px;border-bottom:1px solid var(--line2)}
 .mpop{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px 14px;width:280px;z-index:4;font-size:14px}
 
 /* modal / toast */
@@ -482,6 +491,8 @@ details pre,.code{background:var(--paper);border:1px solid var(--line2);border-r
   .pcs{grid-template-columns:minmax(0,1fr);flex:1}
   .ovm svg text{font-size:30px}
   .ovm .mk circle:nth-child(1){r:90px}.ovm .mk circle:nth-child(2){r:42px}.ovm .mk circle:nth-child(3){r:25px}
+  .ovm .cl circle:nth-child(1){r:44px}.ovm .cl circle:nth-child(2){r:32px}
+  .map.pan svg text{font-size:26px}.map.pan .mk circle:nth-child(1){r:34px}.map.pan .mk circle:nth-child(2){r:20px}.map.pan .cl circle:nth-child(1){r:44px}.map.pan .cl circle:nth-child(2){r:32px}
   .top{padding:14px 14px 4px}
   .top h1{font-size:24px}
   .view{padding:12px 14px 110px}

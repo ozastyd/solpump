@@ -240,13 +240,13 @@ ROUTES.overview = () => {
   const hNow = lh(S.now), ySame = ps.reduce((s, p) => s + window_(p.id, S.now - D - hNow * H, S.now - D).reduce((a, x) => a + (x.m.flow_lpm || 0) * x.dt / 1000, 0), 0);
   const tanks = scoped(S.tanks);
   const shown = items.slice(0, 4);
-  const { g, W, Hm } = ps.length ? mapSvg(ps, true) : { g: "", W: 1000, Hm: 400 };
+  const { g, W, Hm } = ps.length ? mapSvg(ps, true, { site: UI.site }) : { g: "", W: 1000, Hm: 400 };
   const delta = ySame > 0.5 ? (k.water >= ySame ? tl("Up {pct}% on yesterday at the same time ({prev} m³). Yesterday's total: {tot} m³.", { pct: Math.abs(Math.round((k.water / ySame - 1) * 100)), prev: fmtN(ySame, 1), tot: fmtN(tY, 1) }) : tl("Down {pct}% on yesterday at the same time ({prev} m³). Yesterday's total: {tot} m³.", { pct: Math.abs(Math.round((k.water / ySame - 1) * 100)), prev: fmtN(ySame, 1), tot: fmtN(tY, 1) })) : "";
   const kt = (ic, tone, label, val) => `<div class="kt" role="listitem"><span class="ki ${tone}">${ic.startsWith("<") ? ic : `<svg viewBox="0 0 24 24" aria-hidden="true">${IC[ic]}</svg>`}</span><div><span class="kl">${label}</span><b class="kv2 num ${tone}">${val}</b></div></div>`;
   setView(`
   <div class="ovh">
    <section class="panel ovm" aria-labelledby="map-h"><div class="hd"><div><h2 id="map-h">${tl("Your pumps and tanks")}</h2><p class="na" style="margin:2px 0 0">${tl("Tap a pump to see how it is doing.")}</p></div><span class="sp"></span><span class="legend"><span><span class="dot" style="background:var(--ok)"></span> ${tl("healthy")}</span><span><span class="dot" style="background:var(--warn)"></span> ${tl("attention")}</span><span><span class="dot" style="background:var(--crit)"></span> ${tl("critical")}</span><span><span class="dot" style="background:var(--off)"></span> ${tl("offline")}</span></span></div>
-    <div class="map" id="map"><svg viewBox="0 0 ${W} ${Hm}" role="img" aria-label="${esc(tl("Map of pumps"))}">${g}</svg><div id="mpop"></div></div></section>
+    <div class="map" id="map"><svg viewBox="0 0 ${W} ${Hm}" role="img" aria-label="${esc(tl("Map of pumps"))}">${g}</svg>${UI.site !== "all" ? `<button class="btn sm mapall" data-site="all">${tl("Show all sites")}</button>` : ""}${mapAttr()}<div id="mpop"></div></div></section>
    <section class="panel ovw"><div class="bd"><span class="kl">${tl("Water pumped today")}</span>
      <div class="wnum"><b class="num" data-k="ov-water" data-t="n" data-d="1" data-v="${k.water}">${fmtN(k.water, 1)}</b><span>m³</span></div>
      <p class="small" style="margin:6px 0 0">${delta}</p>
@@ -268,45 +268,74 @@ ROUTES.overview = () => {
   <section class="pcs-wrap"><div class="row" style="margin:0 0 12px;gap:14px"><h2 style="font-size:20px">${tl("Pumps")}</h2><span class="sp" style="flex:1"></span>
    <div class="seg" role="group" aria-label="${esc(tl("Filter by site"))}"><button data-site="all" class="${UI.site === "all" ? "on" : ""}">${tl("All sites")}</button>${sites.map(s => `<button data-site="${s}" class="${UI.site === s ? "on" : ""}">${esc(site(s).name.split(" — ")[0])}</button>`).join("")}</div></div>
    <div class="pgrid2">${filt.length ? filt.map(pumpCard).join("") : `<div class="muted">${tl("No pumps visible to you yet.")}</div>`}</div></section>`);
-  return { title: tl("Fleet overview"), after() { bindRows(); bindMap(); document.querySelectorAll("[data-site]").forEach(b => b.onclick = () => { UI.site = b.dataset.site; renderAll(true); }); } };
+  return { title: tl("Fleet overview"), after() { bindRows(); bindMap(sid => { UI.site = sid; renderAll(true); }); document.querySelectorAll("[data-site]").forEach(b => b.onclick = () => { UI.site = b.dataset.site; renderAll(true); }); } };
 };
 export function bindRows() { document.querySelectorAll("[data-p]").forEach(r => { const f = () => navTo(`#/pump/${r.dataset.p}${r.dataset.tab ? "/" + r.dataset.tab : ""}`, r); r.onclick = f; r.onkeydown = e => { if (e.key === "Enter") f(); }; }); }
 
-/* ---------- MAP ---------- */
-export function mapSvg(ps, simple) {
-  const lats = ps.map(p => p.lat), lngs = ps.map(p => p.lng);
-  const cLat = (Math.max(...lats) + Math.min(...lats)) / 2, kx = Math.cos(cLat * Math.PI / 180);
-  let x0 = Math.min(...lngs) * kx, x1 = Math.max(...lngs) * kx, y0 = Math.min(...lats), y1 = Math.max(...lats);
-  const pad = Math.max(x1 - x0, y1 - y0) * 0.22 + 0.002; x0 -= pad; x1 += pad; y0 -= pad; y1 += pad;
-  const W = 1000, Hh = Math.round(W * (y1 - y0) / (x1 - x0)); const Hm = clamp(Hh, simple ? 520 : 380, 640);
-  const sx = W / (x1 - x0), sy = Hm / (y1 - y0), s_ = Math.min(sx, sy);
-  const P = (lat, lng) => [(lng * kx - x0) * s_ + (W - (x1 - x0) * s_) / 2, (y1 - lat) * s_ + (Hm - (y1 - y0) * s_) / 2];
-  const km = 111.32 * s_ * 1; // px per degree → px per km = s_/111.32
-  const pxKm = s_ / 111.32;
-  let g = simple ? "" : `<defs><pattern id="gd" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="var(--line2)"/></pattern></defs><rect width="${W}" height="${Hm}" fill="url(#gd)"/>`;
-  // a river and road (schematic context)
-  g += `<path d="M-20 ${Hm * 0.78} C ${W * 0.25} ${Hm * 0.62}, ${W * 0.45} ${Hm * 0.95}, ${W + 20} ${Hm * 0.7}" stroke="var(--water)" stroke-opacity=".18" stroke-width="14" fill="none"/>`;
-  g += `<path d="M ${W * 0.08} -10 L ${W * 0.52} ${Hm + 10}" stroke="var(--line)" stroke-width="6" fill="none"/>`;
-  for (const sid of new Set(ps.map(p => p.site))) { const sp = ps.filter(p => p.site === sid).map(p => P(p.lat, p.lng)); const cx = sp.reduce((a, b) => a + b[0], 0) / sp.length, cy = sp.reduce((a, b) => a + b[1], 0) / sp.length; const r = Math.max(70, ...sp.map(q => Math.hypot(q[0] - cx, q[1] - cy) + 55)); g += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--brand)" fill-opacity=".05" stroke="var(--brand)" stroke-opacity=".35" stroke-dasharray="4 5"/><text x="${cx}" y="${cy - r - 8}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink2)">${esc(site(sid).name)}</text>`; }
-  const tks = {}; for (const p of ps) { const tp = P(p.lat, p.lng); (tks[p.tank] = tks[p.tank] || []).push(tp); }
-  if (!simple) for (const [tid, l] of Object.entries(tks)) { const cx = l.reduce((a, b) => a + b[0], 0) / l.length + 30, cy = l.reduce((a, b) => a + b[1], 0) / l.length - 34; for (const q of l) g += `<line x1="${q[0]}" y1="${q[1]}" x2="${cx}" y2="${cy}" stroke="var(--water)" stroke-width="2" stroke-opacity=".5"/>`; const tk = byId(S.tanks, tid), pct = SIM[S.pumps.find(p => p.tank === tid).id].tankPct || 0; g += `<g><rect x="${cx - 13}" y="${cy - 16}" width="26" height="32" rx="3" fill="var(--card)" stroke="var(--water)" stroke-width="1.5"/><rect x="${cx - 11}" y="${cy + 14 - 28 * pct / 100}" width="22" height="${28 * pct / 100}" fill="var(--water)" opacity=".55"/><text x="${cx + 18}" y="${cy + 4}" font-size="12" fill="var(--ink2)">${esc(tlx(tk.name))} · ${Math.round(pct)}%</text></g>`; }
-  for (const p of ps) { const [x, y] = P(p.lat, p.lng), st = statusM(p); g += `<g class="mk" data-mk="${p.id}" tabindex="0" role="button" aria-label="${esc(p.short)}: ${esc(tlx(ST_TXT[st.c]))}" style="cursor:pointer">${simple ? `<circle cx="${x}" cy="${y}" r="52" fill="transparent"/>` : ""}<circle cx="${x}" cy="${y}" r="${simple ? 24 : 17}" fill="var(--${st.c})" opacity=".18"/><circle cx="${x}" cy="${y}" r="${simple ? 14 : 10}" fill="var(--${st.c})" stroke="var(--card)" stroke-width="3"/><text x="${x}" y="${y + (simple ? 42 : 30)}" text-anchor="middle" font-size="${simple ? 17 : 13}" font-weight="600" fill="var(--ink)">${esc(p.short)}</text></g>`; }
-  if (!simple) { const barKm = pxKm * 1 > 200 ? 0.25 : pxKm * 0.5 > 60 ? 0.5 : 1; g += `<g transform="translate(20 ${Hm - 22})"><rect width="${pxKm * barKm}" height="5" fill="var(--ink2)"/><text y="-6" font-size="12" fill="var(--ink2)">${barKm * 1000} m</text></g><g transform="translate(${W - 34} 34)"><path d="M0 -16 L7 6 L0 1 L-7 6Z" fill="var(--ink2)"/><text y="22" text-anchor="middle" font-size="12" fill="var(--ink2)">${tl("N")}</text></g>`; }
-  return { g, W, Hm };
+/* ---------- MAP: OpenStreetMap raster tiles under an SVG marker layer (web-mercator, no library) ---------- */
+const TPX = 256, OSM = "https://tile.openstreetmap.org", MW = 1000;
+const mX = (lng, z) => (lng + 180) / 360 * TPX * 2 ** z, mY = (lat, z) => { const s = Math.sin(lat * Math.PI / 180); return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * TPX * 2 ** z; };
+const uX = (x, z) => x / (TPX * 2 ** z) * 360 - 180, uY = (y, z) => Math.atan(Math.sinh(Math.PI * (1 - 2 * y / (TPX * 2 ** z)))) * 180 / Math.PI;
+export const MAPV = { site: "all", z: null, c: null }; // Map page view; z/c null = fit the chosen site
+let TILEC = null; // last tile layer node, swapped back in on live re-renders so tiles never reload or flash
+const HALO = `paint-order="stroke" stroke="var(--card)" stroke-width="5" stroke-linejoin="round"`;
+const WORST = ["crit", "off", "warn", "ok"];
+export function mapSvg(ps, simple, v = {}) {
+  const Hm = simple ? 560 : 520, fit = v.site && v.site !== "all" ? ps.filter(p => p.site === v.site) : [], fp = fit.length ? fit : ps;
+  const xs = fp.map(p => mX(p.lng, 0)), ys = fp.map(p => mY(p.lat, 0)), dx = Math.max(...xs) - Math.min(...xs), dy = Math.max(...ys) - Math.min(...ys);
+  const z = clamp(v.z ?? Math.floor(Math.log2(Math.min((MW - 260) / (dx || 1e-9), (Hm - 240) / (dy || 1e-9)))), 3, 18), n = 2 ** z;
+  const c = v.c || [uY((Math.max(...ys) + Math.min(...ys)) / 2, 0), uX((Math.max(...xs) + Math.min(...xs)) / 2, 0)];
+  const ox = mX(c[1], z) - MW / 2, oy = mY(c[0], z) - Hm / 2, P = (lat, lng) => [mX(lng, z) - ox, mY(lat, z) - oy];
+  const mg = simple ? TPX : 0; // overview letterboxes (meet), so tile past the viewBox edges
+  let t = ""; for (let ty = Math.floor((oy - mg) / TPX); ty <= Math.floor((oy + Hm + mg) / TPX); ty++) { if (ty < 0 || ty >= n) continue; for (let tx = Math.floor((ox - mg) / TPX); tx <= Math.floor((ox + MW + mg) / TPX); tx++) t += `<image href="${OSM}/${z}/${(tx % n + n) % n}/${ty}.png" x="${(tx * TPX - ox).toFixed(1)}" y="${(ty * TPX - oy).toFixed(1)}" width="${TPX + .5}" height="${TPX + .5}"/>`; }
+  let g = `<g class="tl" data-tk="${z}/${ox.toFixed(1)}/${oy.toFixed(1)}/${mg}">${t}</g>`;
+  const open = [];
+  for (const sid of new Set(ps.map(p => p.site))) {
+    const sp = ps.filter(p => p.site === sid), q = sp.map(p => P(p.lat, p.lng)), cx = q.reduce((a, b) => a + b[0], 0) / q.length, cy = q.reduce((a, b) => a + b[1], 0) / q.length, spr = Math.max(0, ...q.map(a => Math.hypot(a[0] - cx, a[1] - cy))), nm = site(sid).name;
+    if (sp.length > 1 && spr * 2 < (simple ? 110 : 60)) {
+      const sts = sp.map(p => statusM(p).c), w = WORST.find(c => sts.includes(c)), R = simple ? 26 : 19;
+      g += `<g class="cl" data-cl="${sid}" tabindex="0" role="button" aria-label="${esc(tl("{site}: {n} pumps. Zoom in", { site: nm, n: sp.length }))}" style="cursor:pointer"><circle cx="${cx}" cy="${cy}" r="${R + 12}" fill="var(--${w})" opacity=".2"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="var(--card)" stroke="var(--${w})" stroke-width="4"/><text x="${cx}" y="${cy + R * .3}" text-anchor="middle" font-size="${simple ? 22 : 16}" font-weight="700" fill="var(--ink)">${sp.length}</text><text x="${cx}" y="${cy + R + (simple ? 34 : 26)}" text-anchor="middle" font-size="${simple ? 17 : 13}" font-weight="600" fill="var(--ink)" ${HALO}>${esc(nm.split(" — ")[0])}</text></g>`;
+    } else { open.push(...sp); const r = Math.max(70, spr + 55); g += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--brand)" fill-opacity=".07" stroke="var(--brand)" stroke-opacity=".6" stroke-width="2" stroke-dasharray="5 6"/><text x="${cx}" y="${cy - r - 8}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink2)" ${HALO}>${esc(nm)}</text>`; }
+  }
+  const tks = {}; for (const p of open) (tks[p.tank] = tks[p.tank] || []).push(P(p.lat, p.lng));
+  if (!simple) for (const [tid, l] of Object.entries(tks)) { const cx = l.reduce((a, b) => a + b[0], 0) / l.length + 30, cy = l.reduce((a, b) => a + b[1], 0) / l.length - 34; for (const q of l) g += `<line x1="${q[0]}" y1="${q[1]}" x2="${cx}" y2="${cy}" stroke="var(--water)" stroke-width="2.5" stroke-opacity=".7"/>`; const tk = byId(S.tanks, tid), pct = SIM[S.pumps.find(p => p.tank === tid).id].tankPct || 0; g += `<g><title>${esc(tlx(tk.name))} · ${Math.round(pct)}%</title><rect x="${cx - 13}" y="${cy - 16}" width="26" height="32" rx="3" fill="var(--card)" stroke="var(--water)" stroke-width="1.5"/><rect x="${cx - 11}" y="${cy + 14 - 28 * pct / 100}" width="22" height="${28 * pct / 100}" fill="var(--water)" opacity=".55"/><text x="${cx + 18}" y="${cy + 4}" font-size="12" font-weight="600" fill="var(--ink2)" ${HALO}>${Math.round(pct)}%</text></g>`; }
+  for (const p of open) { const [x, y] = P(p.lat, p.lng), st = statusM(p); g += `<g class="mk" data-mk="${p.id}" tabindex="0" role="button" aria-label="${esc(p.short)}: ${esc(tlx(ST_TXT[st.c]))}" style="cursor:pointer">${simple ? `<circle cx="${x}" cy="${y}" r="52" fill="transparent"/>` : ""}<circle cx="${x}" cy="${y}" r="${simple ? 24 : 17}" fill="var(--${st.c})" opacity=".25"/><circle cx="${x}" cy="${y}" r="${simple ? 14 : 10}" fill="var(--${st.c})" stroke="var(--card)" stroke-width="3"/><text x="${x}" y="${y + (simple ? 42 : 30)}" text-anchor="middle" font-size="${simple ? 17 : 13}" font-weight="600" fill="var(--ink)" ${HALO}>${esc(p.short)}</text></g>`; }
+  g = `<g class="mv">${g}</g>`;
+  if (!simple) { const mpp = 40075016.686 * Math.cos(c[0] * Math.PI / 180) / (TPX * n), m = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000].filter(d => d / mpp <= 160).pop() || 20, w = m / mpp; g += `<g transform="translate(20 ${Hm - 18})"><rect x="-8" y="-24" width="${w + 16}" height="36" rx="6" fill="var(--card)" opacity=".88"/><rect width="${w}" height="5" fill="var(--ink2)"/><text y="-7" font-size="12" fill="var(--ink2)">${m >= 1000 ? m / 1000 + " km" : m + " m"}</text></g>`; }
+  return { g, W: MW, Hm, z, c };
 }
-export function bindMap() {
+export const mapAttr = () => `<div class="mattr">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> ${tl("contributors")}</div>`;
+export function bindMap(onCluster) {
+  const t = $("#map .tl"); if (t) { if (TILEC && TILEC.dataset.tk === t.dataset.tk) t.replaceWith(TILEC); else TILEC = t; }
   const open = (id, el) => { const p = pump(id), st = statusM(p), m = last(p.id)?.m || {}, h = healthM(p), box = $("#map").getBoundingClientRect(), r = el.getBoundingClientRect(); const pop = $("#mpop"); pop.className = "mpop"; pop.style.left = clamp(r.left - box.left - 130, 6, box.width - 290) + "px"; pop.style.top = (r.bottom - box.top + 8) + "px";
     pop.innerHTML = `<div class="row" style="justify-content:space-between"><b>${esc(p.short)}</b>${stCell(st)}</div><p class="small muted" style="margin:4px 0 8px">${esc(tlx(st.detail))}</p><dl class="kv small"><dt>${tl("Flow")}</dt><dd>${has(p, "flow_lpm") ? fmtN(m.flow_lpm, 1) + " L/min" : "—"}</dd><dt>${tl("Water today")}</dt><dd>${fmtN(today(p).water, 1)} m³</dd><dt>${tl("Health")}</dt><dd>${h.score}/100${h.reasons[0] ? " — " + esc(tlx(h.reasons[0].txt)) : ""}</dd></dl><div class="row" style="margin-top:10px"><button class="btn sm pri" data-go="#/pump/${p.id}">${tl("Open pump")}</button><button class="btn sm" data-mclose>${tl("Close")}</button></div>`;
     pop.querySelector("[data-go]").onclick = e => go(e.currentTarget.dataset.go);
     pop.querySelector("[data-mclose]").onclick = () => { pop.className = ""; pop.innerHTML = ""; }; };
-  document.querySelectorAll("[data-mk]").forEach(m => { m.onclick = () => open(m.dataset.mk, m); m.onkeydown = e => { if (e.key === "Enter") open(m.dataset.mk, m); }; });
+  const key = (m, f) => { m.onclick = f; m.onkeydown = e => { if (e.key === "Enter") f(); }; };
+  document.querySelectorAll("[data-mk]").forEach(m => key(m, () => open(m.dataset.mk, m)));
+  if (onCluster) document.querySelectorAll("[data-cl]").forEach(m => key(m, () => onCluster(m.dataset.cl)));
+}
+function panMap(z, c) {
+  const svg = $("#map svg"), mv = svg?.querySelector(".mv"); if (!mv) return;
+  let s = null, moved = false;
+  svg.onpointerdown = e => { if (e.button) return; s = { x: e.clientX, y: e.clientY, k: MW / svg.getBoundingClientRect().width }; moved = false; };
+  svg.onpointermove = e => { if (!s) return; const dx = e.clientX - s.x, dy = e.clientY - s.y; if (!moved && Math.hypot(dx, dy) < 5) return; if (!moved) { moved = true; svg.setPointerCapture(e.pointerId); svg.classList.add("drag"); const pop = $("#mpop"); pop.className = ""; pop.innerHTML = ""; } mv.setAttribute("transform", `translate(${dx * s.k} ${dy * s.k})`); };
+  svg.onpointerup = svg.onpointercancel = e => { if (!s) return; const { k } = s, dx = e.clientX - s.x, dy = e.clientY - s.y; s = null; if (!moved) return; Object.assign(MAPV, { z, c: [uY(mY(c[0], z) - dy * k, z), uX(mX(c[1], z) - dx * k, z)] }); renderAll(true); };
 }
 ROUTES.map = () => {
   const ps = myPumps(); if (!ps.length) { setView(`<div class="panel"><div class="bd">${tl("No assets you can see yet.")}</div></div>`); return { title: tl("Map") }; }
-  const { g, W, Hm } = mapSvg(ps, false);
-  setView(`<section class="panel"><div class="hd"><h2>${tl("Fleet map")}</h2><span class="na">${tl("Schematic site plan from asset coordinates. Satellite basemap tiles plug in here when the map provider is configured.")}</span><span class="sp"></span><span class="legend"><span><span class="dot" style="background:var(--ok)"></span> ${tl("healthy")}</span><span><span class="dot" style="background:var(--warn)"></span> ${tl("warning")}</span><span><span class="dot" style="background:var(--crit)"></span> ${tl("critical")}</span><span><span class="dot" style="background:var(--off)"></span> ${tl("offline")}</span></span></div>
-  <div class="map" id="map"><svg viewBox="0 0 ${W} ${Hm}" role="img" aria-label="${esc(tl("Map of pumps"))}">${g}</svg><div id="mpop"></div></div></section>`);
+  const sites = [...new Set(ps.map(p => p.site))]; if (MAPV.site !== "all" && !sites.includes(MAPV.site)) Object.assign(MAPV, { site: "all", z: null, c: null });
+  const { g, W, Hm, z, c } = mapSvg(ps, false, MAPV);
+  setView(`<section class="panel"><div class="hd"><h2>${tl("Fleet map")}</h2><span class="na">${tl("Pump positions on OpenStreetMap. Drag to move around, tap a site to zoom in.")}</span><span class="sp"></span><span class="legend"><span><span class="dot" style="background:var(--ok)"></span> ${tl("healthy")}</span><span><span class="dot" style="background:var(--warn)"></span> ${tl("warning")}</span><span><span class="dot" style="background:var(--crit)"></span> ${tl("critical")}</span><span><span class="dot" style="background:var(--off)"></span> ${tl("offline")}</span></span></div>
+  <div class="mapbar"><div class="seg" role="group" aria-label="${esc(tl("Filter by site"))}"><button data-ms="all" class="${MAPV.site === "all" ? "on" : ""}">${tl("All sites")}</button>${sites.map(s => `<button data-ms="${s}" class="${MAPV.site === s ? "on" : ""}">${esc(site(s).name.split(" — ")[0])}</button>`).join("")}</div></div>
+  <div class="map pan" id="map"><svg viewBox="0 0 ${W} ${Hm}" role="img" aria-label="${esc(tl("Map of pumps"))}">${g}</svg><div class="mapz"><button class="btn sm" data-mz="1" aria-label="${esc(tl("Zoom in"))}">+</button><button class="btn sm" data-mz="-1" aria-label="${esc(tl("Zoom out"))}">−</button></div>${mapAttr()}<div id="mpop"></div></div></section>`);
+  const view = ch => { Object.assign(MAPV, ch); renderAll(true); };
   return {
-    title: tl("Map"), after: bindMap, live: false,
+    title: tl("Map"), live: false, after() {
+      bindMap(sid => view({ site: sid, z: null, c: null }));
+      document.querySelectorAll("[data-ms]").forEach(b => b.onclick = () => view({ site: b.dataset.ms, z: null, c: null }));
+      document.querySelectorAll("[data-mz]").forEach(b => b.onclick = () => view({ z: clamp(z + +b.dataset.mz, 3, 18), c }));
+      panMap(z, c);
+    },
   };
 };
